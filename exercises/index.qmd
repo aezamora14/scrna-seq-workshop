@@ -25,13 +25,17 @@ Using `synthetic_immune_metadata.csv`:
 3. Propose a biological interpretation for at least two PCs.
 4. Explain the difference between a gene loading and a cell PC score.
 
-## Exercise 4 — `dims` and `resolution`
+## Exercise 4 — Neighbors and resolution sensitivity
 
-Run clustering with `dims=1:10` and `dims=1:30`, then resolutions 0.3, 0.6, and 1.0.
+Complete the [resolution sensitivity exercise in Lesson 5](../lessons/05-neighbors-clustering.qmd#resolution-sensitivity-exercise):
 
-- Which choice changes the number of clusters most?
-- Are any splits dominated by a single donor?
-- Which parameter controls the information used for similarity, and which controls graph granularity?
+1. Construct one SNN graph with `FindNeighbors(obj, dims = 1:30)`.
+2. Cluster that same graph at resolutions `0.2`, `0.4`, `0.6`, `0.8`, and `1.0`.
+3. Save each assignment in a separate `cluster_res_` metadata column.
+4. Compare all assignments on the same UMAP coordinates.
+5. Count the clusters and answer the interpretation questions in the lesson.
+
+As an extension, rebuild the graph with `dims = 1:10` and repeat the comparison. Explain why changing `dims` changes the information used to define similarity, whereas changing `resolution` repartitions a fixed graph.
 
 ## Exercise 5 — Annotation
 
