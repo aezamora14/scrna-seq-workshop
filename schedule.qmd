@@ -1,0 +1,17 @@
+---
+title: "Suggested workshop schedule"
+---
+
+| Time | Module | Emphasis |
+|---|---|---|
+| 09:00–09:30 | Orientation + count matrix | What the data actually represent |
+| 09:30–10:15 | QC | nCount, nFeature, mitochondrial fraction, doublets |
+| 10:15–11:00 | Normalization + HVGs | Cell-level normalization vs gene selection |
+| 11:15–12:00 | Scaling | Centering, variance scaling, regression |
+| 13:00–14:00 | PCA | Loadings, scores, variance, choosing dims |
+| 14:00–15:00 | Neighbors + clustering | SNN graph, resolution, stability |
+| 15:15–15:45 | UMAP | Visualization vs inference |
+| 15:45–16:30 | Markers + annotation | Cell types vs states, multi-gene evidence |
+| 16:30–17:15 | DE + pseudobulk + TCR | Replicates, clonotypes, capstone |
+
+For a two-day version, expand each hands-on block and add the optional integration and compositional-analysis exercises.

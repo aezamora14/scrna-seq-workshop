@@ -1,0 +1,36 @@
+---
+title: "6. UMAP: visualization, not the clustering algorithm"
+---
+
+## What UMAP does
+
+UMAP embeds the high-dimensional representation into two dimensions while prioritizing preservation of local neighborhood structure.
+
+```r
+obj <- RunUMAP(obj, dims = 1:30)
+DimPlot(obj, reduction = "umap", group.by = "seurat_clusters", label = TRUE)
+```
+
+## What you can usually say
+
+Cells that are close on a well-behaved UMAP often share similar local transcriptional neighborhoods.
+
+## What you should not over-interpret
+
+The exact distance between far-apart islands, island size, orientation, and empty space are not direct biological measurements. UMAP is not a phylogenetic tree, trajectory, or quantitative distance map.
+
+## Clustering and UMAP are distinct
+
+Typical logic:
+
+`PCA → neighbor graph → clustering`
+
+and separately:
+
+`PCA → UMAP visualization`
+
+So the cluster labels are usually produced from graph partitioning and then **painted onto** the UMAP.
+
+## A dangerous workflow
+
+"These look like two islands, therefore they are two cell types" is not sufficient. Validate with markers, sample composition, known biology, and sensitivity to preprocessing/parameters.

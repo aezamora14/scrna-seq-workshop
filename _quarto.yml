@@ -1,0 +1,56 @@
+project:
+  type: website
+  render:
+    - "*.qmd"
+    - "lessons/"
+    - "exercises/"
+
+website:
+  title: "Practical scRNA-seq Analysis Workshop"
+  description: "From count matrices to biological interpretation with Seurat"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: setup.qmd
+        text: Setup
+      - href: schedule.qmd
+        text: Schedule
+      - href: capstone.qmd
+        text: Capstone
+    right:
+      - icon: github
+        href: https://github.com/aezamora14/scrna-seq-workshop
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - section: "Foundations"
+        contents:
+          - lessons/01-counts-qc.qmd
+          - lessons/02-normalization-hvg.qmd
+          - lessons/03-scaling.qmd
+      - section: "Representation & structure"
+        contents:
+          - lessons/04-pca.qmd
+          - lessons/05-neighbors-clustering.qmd
+          - lessons/06-umap.qmd
+      - section: "Biological interpretation"
+        contents:
+          - lessons/07-markers-annotation.qmd
+          - lessons/08-subsetting-integration-de.qmd
+          - lessons/09-tcr-integration.qmd
+      - section: "Practice"
+        contents:
+          - exercises/index.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-copy: true
+    code-overflow: wrap
+    css: styles.css
+
+execute:
+  enabled: false

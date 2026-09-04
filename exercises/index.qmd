@@ -1,0 +1,55 @@
+---
+title: "Hands-on exercises"
+---
+
+## Exercise 1 — QC reasoning
+
+Using `synthetic_immune_metadata.csv`:
+
+1. Plot `nCount_RNA`, `nFeature_RNA`, and `percent.mt`.
+2. Identify cells that would be concerning under a simple mitochondrial threshold of 15%.
+3. Explain why you would not use the same `nFeature_RNA` cutoff for every tissue/cell type in a real study.
+
+## Exercise 2 — Normalization versus scaling
+
+1. Normalize the Seurat object.
+2. Select HVGs.
+3. Scale the object.
+4. For `NKG7` and `CCR7`, compare normalized and scaled values for several cells.
+5. Write one sentence explaining what a scaled value of `+2` means.
+
+## Exercise 3 — PCA
+
+1. Run PCA.
+2. Inspect the top positive and negative loadings for PCs 1–5.
+3. Propose a biological interpretation for at least two PCs.
+4. Explain the difference between a gene loading and a cell PC score.
+
+## Exercise 4 — `dims` and `resolution`
+
+Run clustering with `dims=1:10` and `dims=1:30`, then resolutions 0.3, 0.6, and 1.0.
+
+- Which choice changes the number of clusters most?
+- Are any splits dominated by a single donor?
+- Which parameter controls the information used for similarity, and which controls graph granularity?
+
+## Exercise 5 — Annotation
+
+Without using `truth_cell_type`, annotate clusters using marker genes. Then reveal `truth_cell_type` and compare.
+
+## Exercise 6 — T-cell reclustering
+
+Subset CD4/CD8 T cells, rerun preprocessing/PCA/clustering, and ask whether naive/cytotoxic/exhaustion-associated structure becomes clearer.
+
+## Exercise 7 — Biological replication
+
+For CD8 T cells, design a donor-aware comparison of tumor vs blood. Explain why treating every cell as an independent replicate would inflate evidence.
+
+## Exercise 8 — TCR integration
+
+For `clonotype_A` through `clonotype_D`:
+
+- compute clone size;
+- tabulate tissue distribution;
+- tabulate state occupancy;
+- identify which statements are descriptive versus which would require functional validation.

@@ -1,0 +1,48 @@
+---
+title: "8. Subsetting, integration, differential expression, and pseudobulk"
+---
+
+## Why subset and recluster?
+
+In a whole tumor microenvironment, early PCs may separate immune from stromal cells, or myeloid from lymphoid cells. Those axes can overwhelm subtle T-cell differences.
+
+After subsetting T cells, rerun feature selection, scaling, PCA, neighbors, clustering, and UMAP so the reference frame is defined by T-cell variation.
+
+```r
+tcells <- subset(obj, subset = truth_cell_type %in% c("CD4_T", "CD8_T"))
+tcells <- NormalizeData(tcells)
+tcells <- FindVariableFeatures(tcells)
+tcells <- ScaleData(tcells)
+tcells <- RunPCA(tcells)
+tcells <- FindNeighbors(tcells, dims = 1:20)
+tcells <- FindClusters(tcells, resolution = 0.6)
+tcells <- RunUMAP(tcells, dims = 1:20)
+```
+
+## Integration/batch correction
+
+Integration methods attempt to reduce unwanted technical structure while preserving biology. The key question is not "did batches mix?" but **did we remove unwanted technical effects without erasing condition/tissue biology?**
+
+No algorithm can rescue a perfectly confounded design. If all controls were processed on Day 1 and all disease samples on Day 2, batch and biology cannot be uniquely separated computationally.
+
+## Differential expression
+
+`FindMarkers()` can compare predefined groups, but when making donor-level claims you must respect biological replication.
+
+Suppose six donors contribute thousands of T cells. For a treatment comparison, `n` is typically six donors, not the total number of cells.
+
+## Pseudobulk logic
+
+Aggregate raw counts within each biological replicate and cell population, then use bulk RNA-seq frameworks such as edgeR/DESeq2/limma-voom.
+
+Conceptually:
+
+\[
+\text{Donor A CD8 pseudobulk}_g=\sum_{c\in\text{Donor A CD8}}x_{g,c}
+\]
+
+Pseudobulk asks whether **replicate-level** expression differs between conditions while preserving the biological unit of replication.
+
+## Composition is a separate question
+
+A treatment can change the proportion of CD8 T cells without changing expression within CD8 cells, or vice versa. Cell abundance/composition analysis and within-cell-type differential expression should be treated as distinct analyses.

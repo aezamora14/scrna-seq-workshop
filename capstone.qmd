@@ -1,0 +1,25 @@
+---
+title: "Capstone: defend an scRNA-seq analysis"
+---
+
+You are given a tumor/immune scRNA-seq dataset with paired TCR data. Your task is not merely to generate a UMAP; it is to produce an **analysis defense**.
+
+## Deliverables
+
+1. QC rationale and plots.
+2. Normalization/HVG/scaling choices.
+3. PCA interpretation including loadings for selected PCs.
+4. Justification for chosen `dims`.
+5. Clustering sensitivity across at least three resolutions.
+6. Marker-based cell type/state annotations.
+7. A donor-aware differential-expression plan.
+8. A TCR analysis distinguishing clone expansion, phenotype, tissue sharing, and functional claims.
+9. A one-page limitations section identifying at least three ways the analysis could mislead.
+
+## Oral defense questions
+
+- If PC1 is dominated by interferon response, should you regress it out?
+- If a rare population disappears when you move from 40 PCs to 20 PCs, what does that tell you?
+- If a cluster exists only at resolution 1.5 and comes almost entirely from one donor, do you believe it?
+- If UMAP islands move after changing the random seed but graph cluster assignments are stable, what matters more?
+- If an expanded clonotype is enriched in tumor, what can and cannot be concluded?

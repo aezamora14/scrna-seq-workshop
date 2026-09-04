@@ -1,0 +1,42 @@
+---
+title: "7. Marker genes and biological annotation"
+---
+
+## From cluster IDs to biology
+
+After clustering you have labels such as 0, 1, 2, 3. Marker testing asks which genes are enriched in a cluster relative to a comparison set.
+
+```r
+markers <- FindAllMarkers(obj, only.pos = TRUE)
+head(markers)
+```
+
+A marker is not necessarily uniquely expressed. It is often a gene with a systematic difference in expression level and/or prevalence.
+
+## Multi-gene annotation
+
+Prefer coherent programs over single markers.
+
+- T cells: `CD3D`, `CD3E`, `TRAC`
+- B cells: `MS4A1`, `CD79A`, `CD74`
+- NK cells: `NKG7`, `GNLY`, `KLRD1`, `PRF1` with weak/absent T-cell receptor genes
+- Myeloid: `LST1`, `TYROBP`, `FCER1G`, `CTSS`
+
+A cluster with high NKG7 is not automatically NK because cytotoxic CD8 T cells can also express NKG7.
+
+## Cell type versus cell state
+
+A useful hierarchy is:
+
+- **type/lineage:** T cell, B cell, NK, monocyte
+- **state:** naive-like, cytotoxic, IFN-stimulated, proliferating, exhaustion-associated
+
+Do not force every transcriptional state into a new "cell type."
+
+## Statistical significance versus biological significance
+
+With thousands of cells, extremely small expression differences can generate tiny p-values. Evaluate effect size, fraction expressing, replicate consistency, and pathway/program coherence.
+
+::: {.callout-warning}
+Cluster-marker p-values do not solve pseudoreplication for condition-level biological inference. Cluster description and patient-level differential expression are different statistical questions.
+:::

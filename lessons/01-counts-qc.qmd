@@ -1,0 +1,62 @@
+---
+title: "1. Counts and quality control"
+---
+
+## The starting object: a gene-by-cell matrix
+
+A droplet-based scRNA-seq experiment ultimately gives us a sparse matrix. Rows are genes, columns are cell barcodes, and entries are usually UMI counts.
+
+| Gene | Cell A | Cell B | Cell C |
+|---|---:|---:|---:|
+| CD3D | 8 | 11 | 0 |
+| NKG7 | 16 | 2 | 0 |
+| MS4A1 | 0 | 0 | 14 |
+| LST1 | 0 | 0 | 1 |
+
+The analysis pipeline does not begin with clusters or UMAP. It begins with the question: **which columns are credible representations of intact single cells?**
+
+## What a zero means
+
+A zero is not automatically biological absence. It can mean low expression, sampling failure, limited library depth, or true absence. This is why interpreting one gene in one cell is risky; stable programs across many genes/cells are more reliable.
+
+## Three common QC summaries
+
+### `nFeature_RNA`
+Number of genes detected in a cell. Extremely low values can indicate empty/poor droplets; unusually high values can indicate multiplets.
+
+### `nCount_RNA`
+Total UMI count. High `nCount_RNA` often accompanies high `nFeature_RNA`, but the relationship should be inspected rather than thresholded blindly.
+
+### mitochondrial percentage
+A high mitochondrial fraction can accompany damaged/stressed cells because cytoplasmic RNA is lost disproportionately.
+
+```r
+obj[["percent.mt"]] <- PercentageFeatureSet(obj, pattern = "^MT-")
+VlnPlot(obj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+```
+
+Our synthetic metadata already contains a pedagogical `percent.mt` variable, so you can explore its distribution even though the synthetic count matrix does not contain mitochondrial genes.
+
+## Why universal cutoffs are a mistake
+
+A lymphocyte may naturally contain fewer detected genes than a malignant epithelial cell. A fixed rule such as `nFeature_RNA < 5000` can therefore remove legitimate cells in one tissue and fail to remove doublets in another.
+
+A better workflow is:
+
+1. examine each sample separately;
+2. visualize joint relationships (`nCount` vs `nFeature`, mitochondrial fraction vs counts);
+3. consider tissue biology;
+4. use doublet detection when appropriate;
+5. document the exact thresholds and sensitivity analyses.
+
+```r
+FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+```
+
+::: {.callout-important}
+QC is not cosmetic cleanup. Filtering changes the population on which every subsequent mean, variance, PC loading, neighborhood, and cluster will be calculated.
+:::
+
+## Exercise
+
+Open `exercises/index.qmd` and complete Exercise 1 before continuing.

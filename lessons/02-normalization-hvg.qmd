@@ -1,0 +1,55 @@
+---
+title: "2. Normalization and highly variable genes"
+---
+
+## The problem normalization solves
+
+Two otherwise similar cells can have different total UMI counts simply because one cell was captured/sequenced more deeply.
+
+Suppose:
+
+- Cell A: 5,000 total UMIs; CD3D = 50
+- Cell B: 10,000 total UMIs; CD3D = 100
+
+The raw CD3D counts differ twofold, but CD3D occupies the same fraction of each library. Standard log normalization therefore performs a cell-level library-size correction followed by a log transform.
+
+For Seurat's default `LogNormalize`, conceptually:
+
+\[
+\text{normalized}_{g,c}=\log\left(1+\frac{x_{g,c}}{\sum_gx_{g,c}}\times10,000\right)
+\]
+
+```r
+obj <- NormalizeData(obj, normalization.method = "LogNormalize", scale.factor = 10000)
+```
+
+### What normalization does *not* do
+
+It does not remove batch effects, make donors biological replicates, eliminate dropout, or make genes comparable for PCA. Those are separate issues.
+
+## Highly variable genes (HVGs)
+
+PCA usually should not be driven by thousands of genes that barely change across cells. `FindVariableFeatures()` identifies genes with more variability than expected for their average expression.
+
+```r
+obj <- FindVariableFeatures(obj, selection.method = "vst", nfeatures = 2000)
+VariableFeaturePlot(obj)
+```
+
+The key idea is the **mean–variance relationship**: highly expressed genes tend to have greater raw variance even when nothing interesting is happening. HVG methods model that relationship and prioritize features that vary unusually strongly.
+
+### HVG does not mean "important gene"
+
+A gene can be biologically essential but nearly constant across all cells. It would be poor for distinguishing cells and therefore may not be selected as an HVG. Conversely, a highly variable gene can reflect technical or stress-associated variation.
+
+## Example
+
+If ACTB is high in nearly every immune cell, it contributes little to distinguishing T cells from B cells. If CD3D, MS4A1, and LST1 differ strongly among populations, they are far more informative for cell-state representation.
+
+## SCTransform
+
+SCTransform is an alternative normalization/variance-stabilization strategy that models UMI counts with a regularized negative-binomial framework. It can replace the classic `NormalizeData()` → `FindVariableFeatures()` → `ScaleData()` preprocessing sequence in many workflows. The workshop starts with the classic workflow because its individual transformations are easier to learn explicitly.
+
+::: {.callout-note}
+Do not mix conceptual questions. "Which cells have different library depths?" is normalization. "Which genes vary unusually across cells?" is feature selection.
+:::

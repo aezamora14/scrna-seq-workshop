@@ -1,0 +1,49 @@
+---
+title: "Workshop setup"
+---
+
+## Software
+
+Install:
+
+- R (recent release)
+- RStudio Desktop or another R IDE
+- Quarto (only needed to render/edit the teaching site)
+- Git (recommended)
+
+Then run:
+
+```r
+source("scripts/00_setup.R")
+```
+
+The core hands-on analysis uses `Seurat`. Later exercises optionally use `dplyr`, `ggplot2`, `patchwork`, and `Matrix`.
+
+## Load the synthetic dataset
+
+```r
+library(Seurat)
+
+counts <- read.csv(
+  "data/synthetic_immune_counts.csv",
+  row.names = 1,
+  check.names = FALSE
+)
+metadata <- read.csv("data/synthetic_immune_metadata.csv")
+rownames(metadata) <- metadata$cell_id
+
+obj <- CreateSeuratObject(
+  counts = as.matrix(counts),
+  meta.data = metadata,
+  project = "scrna_workshop"
+)
+obj
+```
+
+::: {.callout-warning}
+The synthetic dataset is intentionally small and simplified. It is suitable for learning mechanics and interpretation, not for benchmarking biological performance.
+:::
+
+## Recommended folder workflow
+
+Open `scrna-seq-workshop.Rproj` and keep the project root as the working directory. Avoid hard-coded absolute paths so the same code works for every participant and on GitHub/Codex.
