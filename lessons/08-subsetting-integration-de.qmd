@@ -37,9 +37,10 @@ Aggregate raw counts within each biological replicate and cell population, then 
 
 Conceptually:
 
-\[
-\text{Donor A CD8 pseudobulk}_g=\sum_{c\in\text{Donor A CD8}}x_{g,c}
-\]
+$$
+\text{Donor A CD8 pseudobulk}_g
+= \sum_{c \in \text{Donor A CD8 cells}} x_{g,c}
+$$
 
 Pseudobulk asks whether **replicate-level** expression differs between conditions while preserving the biological unit of replication.
 

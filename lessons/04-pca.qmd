@@ -12,9 +12,11 @@ If PCA uses 2,000 variable genes, every cell initially occupies a 2,000-dimensio
 
 A simplified component might be:
 
-\[
-PC_3=0.31(NKG7)+0.29(GNLY)+0.25(PRF1)-0.21(CCR7)-0.19(IL7R)+\cdots
-\]
+$$
+\mathrm{PC}_3
+= 0.31(\mathrm{NKG7}) + 0.29(\mathrm{GNLY}) + 0.25(\mathrm{PRF1})
+- 0.21(\mathrm{CCR7}) - 0.19(\mathrm{IL7R}) + \cdots
+$$
 
 The coefficients are **gene loadings**. Large absolute loadings mean a gene contributes strongly to that PC; the sign indicates direction along the axis.
 

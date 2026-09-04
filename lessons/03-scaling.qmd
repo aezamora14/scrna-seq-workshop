@@ -14,9 +14,9 @@ A useful shorthand is:
 
 For each gene independently, Seurat approximately transforms expression as:
 
-\[
-z_{i,j}=\frac{x_{i,j}-\bar{x}_{j}}{s_j}
-\]
+$$
+z_{i,j} = \frac{x_{i,j} - \bar{x}_j}{s_j}
+$$
 
 where `x` is normalized expression for gene `j` in cell `i`, `mean` is that gene's mean across the analyzed cells, and `s` is that gene's standard deviation.
 

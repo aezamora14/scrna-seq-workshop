@@ -15,9 +15,10 @@ The raw CD3D counts differ twofold, but CD3D occupies the same fraction of each 
 
 For Seurat's default `LogNormalize`, conceptually:
 
-\[
-\text{normalized}_{g,c}=\log\left(1+\frac{x_{g,c}}{\sum_gx_{g,c}}\times10,000\right)
-\]
+$$
+\operatorname{normalized}_{g,c}
+= \log\left(1 + \frac{x_{g,c}}{\sum_{g'} x_{g',c}} \times 10{,}000\right)
+$$
 
 ```r
 obj <- NormalizeData(obj, normalization.method = "LogNormalize", scale.factor = 10000)
