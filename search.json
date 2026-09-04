@@ -272,7 +272,7 @@
     "href": "lessons/03-scaling.html#centering-and-variance-scaling",
     "title": "3. Scaling: putting genes on a comparable reference frame",
     "section": "Centering and variance scaling",
-    "text": "Centering and variance scaling\nFor each gene independently, Seurat approximately transforms expression as:\n[ z_{i,j}= ]\nwhere x is normalized expression for gene j in cell i, mean is that gene’s mean across the analyzed cells, and s is that gene’s standard deviation.\nAfter scaling:\n\n0 means approximately average expression for that gene;\n+1 means one standard deviation above the gene’s mean;\n-1 means one standard deviation below the gene’s mean.",
+    "text": "Centering and variance scaling\nFor each gene independently, Seurat approximately transforms expression as:\n\\[\nz_{i,j} = \\frac{x_{i,j} - \\bar{x}_j}{s_j}\n\\]\nwhere x is normalized expression for gene j in cell i, mean is that gene’s mean across the analyzed cells, and s is that gene’s standard deviation.\nAfter scaling:\n\n0 means approximately average expression for that gene;\n+1 means one standard deviation above the gene’s mean;\n-1 means one standard deviation below the gene’s mean.",
     "crumbs": [
       "Home",
       "Foundations",
@@ -578,7 +578,7 @@
     "href": "lessons/02-normalization-hvg.html",
     "title": "2. Normalization and highly variable genes",
     "section": "",
-    "text": "Two otherwise similar cells can have different total UMI counts simply because one cell was captured/sequenced more deeply.\nSuppose:\n\nCell A: 5,000 total UMIs; CD3D = 50\nCell B: 10,000 total UMIs; CD3D = 100\n\nThe raw CD3D counts differ twofold, but CD3D occupies the same fraction of each library. Standard log normalization therefore performs a cell-level library-size correction followed by a log transform.\nFor Seurat’s default LogNormalize, conceptually:\n[ _{g,c}=(1+,000) ]\nobj &lt;- NormalizeData(obj, normalization.method = \"LogNormalize\", scale.factor = 10000)\n\n\nIt does not remove batch effects, make donors biological replicates, eliminate dropout, or make genes comparable for PCA. Those are separate issues.",
+    "text": "Two otherwise similar cells can have different total UMI counts simply because one cell was captured/sequenced more deeply.\nSuppose:\n\nCell A: 5,000 total UMIs; CD3D = 50\nCell B: 10,000 total UMIs; CD3D = 100\n\nThe raw CD3D counts differ twofold, but CD3D occupies the same fraction of each library. Standard log normalization therefore performs a cell-level library-size correction followed by a log transform.\nFor Seurat’s default LogNormalize, conceptually:\n\\[\n\\operatorname{normalized}_{g,c}\n= \\log\\left(1 + \\frac{x_{g,c}}{\\sum_{g'} x_{g',c}} \\times 10{,}000\\right)\n\\]\nobj &lt;- NormalizeData(obj, normalization.method = \"LogNormalize\", scale.factor = 10000)\n\n\nIt does not remove batch effects, make donors biological replicates, eliminate dropout, or make genes comparable for PCA. Those are separate issues.",
     "crumbs": [
       "Home",
       "Foundations",
@@ -590,7 +590,7 @@
     "href": "lessons/02-normalization-hvg.html#the-problem-normalization-solves",
     "title": "2. Normalization and highly variable genes",
     "section": "",
-    "text": "Two otherwise similar cells can have different total UMI counts simply because one cell was captured/sequenced more deeply.\nSuppose:\n\nCell A: 5,000 total UMIs; CD3D = 50\nCell B: 10,000 total UMIs; CD3D = 100\n\nThe raw CD3D counts differ twofold, but CD3D occupies the same fraction of each library. Standard log normalization therefore performs a cell-level library-size correction followed by a log transform.\nFor Seurat’s default LogNormalize, conceptually:\n[ _{g,c}=(1+,000) ]\nobj &lt;- NormalizeData(obj, normalization.method = \"LogNormalize\", scale.factor = 10000)\n\n\nIt does not remove batch effects, make donors biological replicates, eliminate dropout, or make genes comparable for PCA. Those are separate issues.",
+    "text": "Two otherwise similar cells can have different total UMI counts simply because one cell was captured/sequenced more deeply.\nSuppose:\n\nCell A: 5,000 total UMIs; CD3D = 50\nCell B: 10,000 total UMIs; CD3D = 100\n\nThe raw CD3D counts differ twofold, but CD3D occupies the same fraction of each library. Standard log normalization therefore performs a cell-level library-size correction followed by a log transform.\nFor Seurat’s default LogNormalize, conceptually:\n\\[\n\\operatorname{normalized}_{g,c}\n= \\log\\left(1 + \\frac{x_{g,c}}{\\sum_{g'} x_{g',c}} \\times 10{,}000\\right)\n\\]\nobj &lt;- NormalizeData(obj, normalization.method = \"LogNormalize\", scale.factor = 10000)\n\n\nIt does not remove batch effects, make donors biological replicates, eliminate dropout, or make genes comparable for PCA. Those are separate issues.",
     "crumbs": [
       "Home",
       "Foundations",
@@ -662,7 +662,7 @@
     "href": "lessons/04-pca.html#a-principal-component-is-a-weighted-combination-of-genes",
     "title": "4. Principal component analysis (PCA)",
     "section": "A principal component is a weighted combination of genes",
-    "text": "A principal component is a weighted combination of genes\nA simplified component might be:\n[ PC_3=0.31(NKG7)+0.29(GNLY)+0.25(PRF1)-0.21(CCR7)-0.19(IL7R)+ ]\nThe coefficients are gene loadings. Large absolute loadings mean a gene contributes strongly to that PC; the sign indicates direction along the axis.\nobj &lt;- RunPCA(obj, features = VariableFeatures(obj))\nVizDimLoadings(obj, dims = 1:5, reduction = \"pca\")\nLoadings(obj, reduction = \"pca\")[1:10, 1:5]",
+    "text": "A principal component is a weighted combination of genes\nA simplified component might be:\n\\[\n\\mathrm{PC}_3\n= 0.31(\\mathrm{NKG7}) + 0.29(\\mathrm{GNLY}) + 0.25(\\mathrm{PRF1})\n- 0.21(\\mathrm{CCR7}) - 0.19(\\mathrm{IL7R}) + \\cdots\n\\]\nThe coefficients are gene loadings. Large absolute loadings mean a gene contributes strongly to that PC; the sign indicates direction along the axis.\nobj &lt;- RunPCA(obj, features = VariableFeatures(obj))\nVizDimLoadings(obj, dims = 1:5, reduction = \"pca\")\nLoadings(obj, reduction = \"pca\")[1:10, 1:5]",
     "crumbs": [
       "Home",
       "Representation & structure",
@@ -842,7 +842,7 @@
     "href": "lessons/08-subsetting-integration-de.html#pseudobulk-logic",
     "title": "8. Subsetting, integration, differential expression, and pseudobulk",
     "section": "Pseudobulk logic",
-    "text": "Pseudobulk logic\nAggregate raw counts within each biological replicate and cell population, then use bulk RNA-seq frameworks such as edgeR/DESeq2/limma-voom.\nConceptually:\n[ g={c}x_{g,c} ]\nPseudobulk asks whether replicate-level expression differs between conditions while preserving the biological unit of replication.",
+    "text": "Pseudobulk logic\nAggregate raw counts within each biological replicate and cell population, then use bulk RNA-seq frameworks such as edgeR/DESeq2/limma-voom.\nConceptually:\n\\[\n\\text{Donor A CD8 pseudobulk}_g\n= \\sum_{c \\in \\text{Donor A CD8 cells}} x_{g,c}\n\\]\nPseudobulk asks whether replicate-level expression differs between conditions while preserving the biological unit of replication.",
     "crumbs": [
       "Home",
       "Biological interpretation",

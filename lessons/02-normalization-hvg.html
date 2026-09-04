@@ -109,6 +109,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -343,7 +372,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>The raw CD3D counts differ twofold, but CD3D occupies the same fraction of each library. Standard log normalization therefore performs a cell-level library-size correction followed by a log transform.</p>
 <p>For Seurat’s default <code>LogNormalize</code>, conceptually:</p>
-<p>[ _{g,c}=(1+,000) ]</p>
+<p><span class="math display">\[
+\operatorname{normalized}_{g,c}
+= \log\left(1 + \frac{x_{g,c}}{\sum_{g'} x_{g',c}} \times 10{,}000\right)
+\]</span></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">NormalizeData</span>(obj, <span class="at">normalization.method =</span> <span class="st">"LogNormalize"</span>, <span class="at">scale.factor =</span> <span class="dv">10000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <section id="what-normalization-does-not-do" class="level3">
 <h3 class="anchored" data-anchor-id="what-normalization-does-not-do">What normalization does <em>not</em> do</h3>
