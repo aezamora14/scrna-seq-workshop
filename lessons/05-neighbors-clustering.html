@@ -298,12 +298,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#from-pca-coordinates-to-a-similarity-graph" id="toc-from-pca-coordinates-to-a-similarity-graph" class="nav-link active" data-scroll-target="#from-pca-coordinates-to-a-similarity-graph">From PCA coordinates to a similarity graph</a></li>
-  <li><a href="#clustering-finds-communities-in-that-graph" id="toc-clustering-finds-communities-in-that-graph" class="nav-link" data-scroll-target="#clustering-finds-communities-in-that-graph">Clustering finds communities in that graph</a></li>
+  <li><a href="#from-pca-coordinates-to-graph-communities" id="toc-from-pca-coordinates-to-graph-communities" class="nav-link active" data-scroll-target="#from-pca-coordinates-to-graph-communities">From PCA coordinates to graph communities</a>
+  <ul class="collapse">
+  <li><a href="#what-is-a-node" id="toc-what-is-a-node" class="nav-link" data-scroll-target="#what-is-a-node">What is a node?</a></li>
+  <li><a href="#what-is-an-edge" id="toc-what-is-an-edge" class="nav-link" data-scroll-target="#what-is-an-edge">What is an edge?</a></li>
+  </ul></li>
+  <li><a href="#from-pca-coordinates-to-a-knn-graph" id="toc-from-pca-coordinates-to-a-knn-graph" class="nav-link" data-scroll-target="#from-pca-coordinates-to-a-knn-graph">From PCA coordinates to a kNN graph</a></li>
+  <li><a href="#why-construct-a-shared-nearest-neighbor-graph" id="toc-why-construct-a-shared-nearest-neighbor-graph" class="nav-link" data-scroll-target="#why-construct-a-shared-nearest-neighbor-graph">Why construct a shared-nearest-neighbor graph?</a></li>
+  <li><a href="#what-findneighbors-does" id="toc-what-findneighbors-does" class="nav-link" data-scroll-target="#what-findneighbors-does">What <code>FindNeighbors()</code> does</a></li>
+  <li><a href="#findclusters-detects-graph-communities" id="toc-findclusters-detects-graph-communities" class="nav-link" data-scroll-target="#findclusters-detects-graph-communities"><code>FindClusters()</code> detects graph communities</a></li>
   <li><a href="#what-resolution-means" id="toc-what-resolution-means" class="nav-link" data-scroll-target="#what-resolution-means">What <code>resolution</code> means</a></li>
-  <li><a href="#overclustering-and-underclustering" id="toc-overclustering-and-underclustering" class="nav-link" data-scroll-target="#overclustering-and-underclustering">Overclustering and underclustering</a></li>
   <li><a href="#dims-and-resolution-solve-different-problems" id="toc-dims-and-resolution-solve-different-problems" class="nav-link" data-scroll-target="#dims-and-resolution-solve-different-problems"><code>dims</code> and <code>resolution</code> solve different problems</a></li>
-  <li><a href="#sensitivity-exercise" id="toc-sensitivity-exercise" class="nav-link" data-scroll-target="#sensitivity-exercise">Sensitivity exercise</a></li>
+  <li><a href="#resolution-sensitivity-exercise" id="toc-resolution-sensitivity-exercise" class="nav-link" data-scroll-target="#resolution-sensitivity-exercise">Resolution sensitivity exercise</a>
+  <ul class="collapse">
+  <li><a href="#calculate-umap-once" id="toc-calculate-umap-once" class="nav-link" data-scroll-target="#calculate-umap-once">Calculate UMAP once</a></li>
+  <li><a href="#visualize-every-resolution" id="toc-visualize-every-resolution" class="nav-link" data-scroll-target="#visualize-every-resolution">Visualize every resolution</a></li>
+  <li><a href="#quantify-the-number-of-clusters" id="toc-quantify-the-number-of-clusters" class="nav-link" data-scroll-target="#quantify-the-number-of-clusters">Quantify the number of clusters</a></li>
+  </ul></li>
+  <li><a href="#optional-visualize-cluster-splitting-with-clustree" id="toc-optional-visualize-cluster-splitting-with-clustree" class="nav-link" data-scroll-target="#optional-visualize-cluster-splitting-with-clustree">Optional: visualize cluster splitting with <code>clustree</code></a></li>
+  <li><a href="#student-interpretation-questions" id="toc-student-interpretation-questions" class="nav-link" data-scroll-target="#student-interpretation-questions">Student interpretation questions</a></li>
+  <li><a href="#choosing-a-defensible-resolution" id="toc-choosing-a-defensible-resolution" class="nav-link" data-scroll-target="#choosing-a-defensible-resolution">Choosing a defensible resolution</a></li>
   </ul>
 </nav>
     </div>
@@ -329,50 +343,300 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="from-pca-coordinates-to-a-similarity-graph" class="level2">
-<h2 class="anchored" data-anchor-id="from-pca-coordinates-to-a-similarity-graph">From PCA coordinates to a similarity graph</h2>
-<p>After PCA, a cell might be represented by 30 numbers rather than 2,000 genes. <code>FindNeighbors()</code> identifies nearby cells in this PCA space and constructs neighbor/SNN graphs.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">FindNeighbors</span>(obj, <span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Conceptually, each cell is a node; edges connect cells with similar local neighborhoods. Shared-nearest-neighbor weighting strengthens relationships that are supported by overlapping neighborhoods rather than one accidental proximity.</p>
+<section id="from-pca-coordinates-to-graph-communities" class="level2">
+<h2 class="anchored" data-anchor-id="from-pca-coordinates-to-graph-communities">From PCA coordinates to graph communities</h2>
+<p>PCA gives every cell a shorter numerical description: its scores on the selected principal components. Seurat uses those coordinates to move through the following sequence:</p>
+<ol type="1">
+<li><strong>PCA coordinates:</strong> represent each cell using selected PC scores.</li>
+<li><strong>Nearest neighbors:</strong> find the cells closest to each cell in that PCA space.</li>
+<li><strong>k-nearest-neighbor graph:</strong> connect cells to their local neighbors.</li>
+<li><strong>shared-nearest-neighbor graph:</strong> strengthen connections supported by overlapping neighborhoods.</li>
+<li><strong>Graph communities:</strong> find groups with stronger connections within the group than outside it.</li>
+<li><strong>Computational clusters:</strong> save a community label for every cell, then interpret those communities biologically.</li>
+</ol>
+<p>In compact form:</p>
+<blockquote class="blockquote">
+<p><strong>PCA coordinates → nearest neighbors → kNN graph → SNN graph → graph communities → clustering</strong></p>
+</blockquote>
+<section id="what-is-a-node" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-a-node">What is a node?</h3>
+<p>A graph consists of objects called <strong>nodes</strong>. In this scRNA-seq graph, <strong>each cell is one node</strong>. A dataset containing 10,000 retained cells therefore contributes 10,000 cell nodes to the graph.</p>
+<pre class="text"><code>       Cell A
+         ●
+
+Cell B ●     ● Cell C
+
+         ●
+       Cell D</code></pre>
+<p>This layout is only a schematic. The positions on the page do not determine which cells are related; the relationships are calculated from similarity in the selected PCA dimensions.</p>
 </section>
-<section id="clustering-finds-communities-in-that-graph" class="level2">
-<h2 class="anchored" data-anchor-id="clustering-finds-communities-in-that-graph">Clustering finds communities in that graph</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">FindClusters</span>(obj, <span class="at">resolution =</span> <span class="fl">0.6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The clustering algorithm does not ask whether a cell is a T cell or monocyte. It asks which sets of nodes are more densely connected to one another than to the rest of the graph.</p>
+<section id="what-is-an-edge" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-an-edge">What is an edge?</h3>
+<p>An <strong>edge</strong> is a connection between two nodes. Here, an edge indicates that two cells are treated as neighbors or have a supported local similarity relationship.</p>
+<pre class="text"><code>Cell A ●────────● Cell B</code></pre>
+<p>A slightly larger graph might look like this:</p>
+<pre class="text"><code>         ● Cell A
+        / \
+       /   \
+Cell B ●───● Cell C
+       \   /
+        \ /
+         ● Cell D────● Cell E</code></pre>
+<p>Not every cell is connected to every other cell. The graph is deliberately sparse: its edges preserve local relationships rather than all possible cell pairs. An edge also does not mean that two cells have the same biological identity, directly interact in the tissue, or belong to the same clone.</p>
+</section>
+</section>
+<section id="from-pca-coordinates-to-a-knn-graph" class="level2">
+<h2 class="anchored" data-anchor-id="from-pca-coordinates-to-a-knn-graph">From PCA coordinates to a kNN graph</h2>
+<p>After PCA, each cell has a coordinate on every retained PC. For example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dims <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>means that cellular similarity is calculated using cell scores in <strong>30-dimensional PCA space</strong>. It does not mean 30 genes or 30 clusters.</p>
+<p>For every cell, Seurat asks:</p>
+<blockquote class="blockquote">
+<p>Which other cells are closest to this cell in PCA space?</p>
+</blockquote>
+<p>The value <em>k</em> is the number of nearby cells considered when defining that local neighborhood. Connecting cells to these neighbors produces the <strong>k-nearest-neighbor (kNN) graph</strong>. In <code>FindNeighbors()</code>, <code>dims</code> selects the PCs that define similarity, whereas <code>k.param</code> controls the neighborhood size.</p>
+</section>
+<section id="why-construct-a-shared-nearest-neighbor-graph" class="level2">
+<h2 class="anchored" data-anchor-id="why-construct-a-shared-nearest-neighbor-graph">Why construct a shared-nearest-neighbor graph?</h2>
+<p>A small pairwise distance can occur because of noise, a boundary between populations, or local differences in cell density. Seurat therefore also asks:</p>
+<blockquote class="blockquote">
+<p>Do two nearby cells share many of the same neighboring cells?</p>
+</blockquote>
+<p>Suppose two neighborhood lists are:</p>
+<pre class="text"><code>Cell A neighbors:
+B, C, D, F, G
+
+Cell B neighbors:
+A, C, D, F, H</code></pre>
+<p>Cells A and B share three surrounding neighbors:</p>
+<pre class="text"><code>C
+D
+F</code></pre>
+<p>That overlap provides stronger evidence that A and B occupy the same local population than distance alone. By contrast, two cells that happen to be close but share few surrounding neighbors receive weaker support.</p>
+<p>The <strong>shared-nearest-neighbor (SNN) graph</strong> weights relationships using this neighborhood overlap. In Seurat, the overlap is represented using a Jaccard-style similarity: connections supported by many shared neighbors are strengthened, and weakly supported connections can be pruned.</p>
+</section>
+<section id="what-findneighbors-does" class="level2">
+<h2 class="anchored" data-anchor-id="what-findneighbors-does">What <code>FindNeighbors()</code> does</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">FindNeighbors</span>(obj, <span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>FindNeighbors()</code> uses the selected PCA dimensions to construct the neighborhood representation, including the SNN graph used for clustering.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>FindNeighbors()</code> does not determine whether a cell is a CD4 T cell, NK cell, monocyte, or another biological identity. It creates the similarity graph used by the clustering algorithm.</p>
+</div>
+</div>
+</section>
+<section id="findclusters-detects-graph-communities" class="level2">
+<h2 class="anchored" data-anchor-id="findclusters-detects-graph-communities"><code>FindClusters()</code> detects graph communities</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">FindClusters</span>(obj, <span class="at">resolution =</span> <span class="fl">0.6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>FindClusters()</code> performs graph-community detection. The algorithm searches for groups of cells that are more strongly interconnected with one another than with the remainder of the graph.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Computational clusters are graph communities. Biological identities are assigned afterward using marker genes, known biology, sample context, and other evidence.</p>
+</div>
+</div>
 </section>
 <section id="what-resolution-means" class="level2">
 <h2 class="anchored" data-anchor-id="what-resolution-means">What <code>resolution</code> means</h2>
 <p>Resolution tunes the granularity of graph partitioning.</p>
-<p><img src="../figures/resolution_low.png" class="img-fluid" style="width:49.0%"> <img src="../figures/resolution_high.png" class="img-fluid" style="width:49.0%"></p>
-<p>Higher resolution generally produces more/smaller communities; lower resolution produces fewer/larger communities.</p>
-<p>It is not a probability, p-value, image resolution, or accuracy score.</p>
-</section>
-<section id="overclustering-and-underclustering" class="level2">
-<h2 class="anchored" data-anchor-id="overclustering-and-underclustering">Overclustering and underclustering</h2>
-<p>A split is more convincing when the daughter clusters:</p>
-<ul>
-<li>persist across nearby resolutions;</li>
-<li>have coherent multi-gene programs;</li>
-<li>are represented across multiple biological samples;</li>
-<li>are not defined only by mitochondrial/ribosomal genes, one donor, or extremely small cell numbers;</li>
-<li>correspond to a plausible discrete state rather than arbitrary slices of a continuum.</li>
-</ul>
+<p><img src="../figures/resolution_low.png" class="img-fluid" style="width:49.0%" alt="Schematic graph divided into a small number of broad communities at low resolution"> <img src="../figures/resolution_high.png" class="img-fluid" style="width:49.0%" alt="The same schematic graph divided into more, smaller communities at high resolution"></p>
+<p>Higher resolution generally produces finer graph partitions and therefore more, smaller clusters. Lower resolution generally produces fewer, broader clusters.</p>
+<p>Resolution is not a probability, p-value, image resolution, or accuracy score. A higher value can reveal a meaningful subpopulation, but it can also divide a continuous state, isolate technical variation, or create unstable small groups.</p>
 </section>
 <section id="dims-and-resolution-solve-different-problems" class="level2">
 <h2 class="anchored" data-anchor-id="dims-and-resolution-solve-different-problems"><code>dims</code> and <code>resolution</code> solve different problems</h2>
 <ul>
-<li><code>dims</code>: <strong>what information defines similarity?</strong></li>
-<li><code>resolution</code>: <strong>how finely do we partition that similarity graph?</strong></li>
+<li><code>dims</code>: <strong>which PCs define cell-to-cell similarity?</strong></li>
+<li><code>resolution</code>: <strong>how finely is the resulting graph partitioned?</strong></li>
 </ul>
-<p>Changing either can change the final clusters, but for different reasons.</p>
+<p>Changing either can alter the final clusters, but for different reasons. For a resolution sensitivity analysis, keep the PCA dimensions and SNN graph fixed so that only graph-partition granularity changes.</p>
 </section>
-<section id="sensitivity-exercise" class="level2">
-<h2 class="anchored" data-anchor-id="sensitivity-exercise">Sensitivity exercise</h2>
-<p>Try combinations such as:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (res <span class="cf">in</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.6</span>, <span class="fl">0.8</span>, <span class="fl">1.0</span>)) {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  obj <span class="ot">&lt;-</span> <span class="fu">FindClusters</span>(obj, <span class="at">resolution =</span> res)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Then inspect whether biologically important groups are stable or appear only under one parameter setting.</p>
+<section id="resolution-sensitivity-exercise" class="level2">
+<h2 class="anchored" data-anchor-id="resolution-sensitivity-exercise">Resolution sensitivity exercise</h2>
+<p>Assume that <code>FindNeighbors(obj, dims = 1:30)</code> has already constructed one SNN graph. Cluster that <strong>same graph</strong> at several resolutions and save every result:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>resolutions <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.6</span>, <span class="fl">0.8</span>, <span class="fl">1.0</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (res <span class="cf">in</span> resolutions) {</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  obj <span class="ot">&lt;-</span> <span class="fu">FindClusters</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    obj,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">resolution =</span> res</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  obj[[<span class="fu">paste0</span>(<span class="st">"cluster_res_"</span>, res)]] <span class="ot">&lt;-</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.character</span>(<span class="fu">Idents</span>(obj))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each <code>FindClusters()</code> call updates the active identities. Saving a copy immediately prevents the earlier assignment from being overwritten by the next resolution. The resulting metadata columns have clear names:</p>
+<pre class="text"><code>cluster_res_0.2
+cluster_res_0.4
+cluster_res_0.6
+cluster_res_0.8
+cluster_res_1</code></pre>
+<p>The final name ends in <code>1</code>, rather than <code>1.0</code>, because that is how R converts the numeric value when constructing the name. These numeric suffixes also work directly with the optional <code>clustree</code> example below.</p>
+<section id="calculate-umap-once" class="level3">
+<h3 class="anchored" data-anchor-id="calculate-umap-once">Calculate UMAP once</h3>
+<p>If UMAP coordinates have not already been calculated from the same PCA representation, calculate them once:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">RunUMAP</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  obj,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Do not rerun UMAP inside the resolution loop. The purpose is to compare several cluster assignments on one fixed set of visualization coordinates.</p>
+</section>
+<section id="visualize-every-resolution" class="level3">
+<h3 class="anchored" data-anchor-id="visualize-every-resolution">Visualize every resolution</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Seurat)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>resolution_plots <span class="ot">&lt;-</span> <span class="fu">lapply</span>(</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  resolutions,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(res) {</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    cluster_column <span class="ot">&lt;-</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="st">"cluster_res_"</span>, res)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">DimPlot</span>(</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>      obj,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">reduction =</span> <span class="st">"umap"</span>,</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">group.by =</span> cluster_column,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">repel =</span> <span class="cn">TRUE</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ggtitle</span>(</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        <span class="fu">paste0</span>(<span class="st">"Resolution = "</span>, res)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">NoLegend</span>()</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="fu">wrap_plots</span>(</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>  resolution_plots,</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">ncol =</span> <span class="dv">2</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled" title="The cells do not move between panels">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>The cells do not move between panels
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Important:</strong> The UMAP coordinates are identical in every panel. The cells are not moving as resolution changes. Only the graph-community assignment used to color and label the cells is changing.</p>
+</div>
+</div>
+</section>
+<section id="quantify-the-number-of-clusters" class="level3">
+<h3 class="anchored" data-anchor-id="quantify-the-number-of-clusters">Quantify the number of clusters</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>cluster_counts <span class="ot">&lt;-</span> <span class="fu">sapply</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  resolutions,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(res) {</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    cluster_column <span class="ot">&lt;-</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="st">"cluster_res_"</span>, res)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">length</span>(</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unique</span>(</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        obj<span class="sc">@</span>meta.data[[cluster_column]]</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(cluster_counts) <span class="ot">&lt;-</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">"resolution_"</span>, resolutions)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>cluster_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Increasing resolution generally produces finer graph partitioning and therefore more clusters. The increase need not occur at every adjacent value, and the size of the increase depends on the graph.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Higher resolution does not mean higher accuracy.</strong> Resolution is a sensitivity parameter, not a score to maximize.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="optional-visualize-cluster-splitting-with-clustree" class="level2">
+<h2 class="anchored" data-anchor-id="optional-visualize-cluster-splitting-with-clustree">Optional: visualize cluster splitting with <code>clustree</code></h2>
+<p>Side-by-side UMAPs show <strong>where</strong> subdivisions appear. A cluster tree complements them by showing <strong>which lower-resolution cluster contributes cells to which higher-resolution clusters</strong>.</p>
+<p><code>clustree</code> is an optional dependency and is not required by the main workshop setup. Install it only if you want this advanced visualization:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">"clustree"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"clustree"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(clustree)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">clustree</span>(</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  obj[[]],</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">prefix =</span> <span class="st">"cluster_res_"</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>obj[[]]</code> returns the cell metadata. <code>clustree()</code> selects columns beginning with <code>cluster_res_</code>, removes that prefix, and orders the remaining numeric suffixes. The saved names therefore work without renaming or preprocessing.</p>
+<p>A cluster tree can help identify:</p>
+<ul>
+<li>which clusters remain stable;</li>
+<li>which clusters split;</li>
+<li>when those splits occur; and</li>
+<li>whether a split persists at higher resolutions.</li>
+</ul>
+<p>Interpret the tree together with the UMAP panels. Neither visualization establishes that a computational split is biologically meaningful.</p>
+</section>
+<section id="student-interpretation-questions" class="level2">
+<h2 class="anchored" data-anchor-id="student-interpretation-questions">Student interpretation questions</h2>
+<ol type="1">
+<li><p>How many clusters are present at each resolution?</p></li>
+<li><p>Which broad populations remain stable across all resolutions?</p></li>
+<li><p>Which population is the first to subdivide as resolution increases?</p></li>
+<li><p>At what resolution does that split appear?</p></li>
+<li><p>Does the split persist at the next resolution?</p></li>
+<li><p>What marker genes would you examine to determine whether the split is biologically meaningful?</p></li>
+<li><p>Could the split instead be driven by:</p>
+<ul>
+<li>mitochondrial expression;</li>
+<li>ribosomal genes;</li>
+<li>sequencing depth;</li>
+<li>cell cycle;</li>
+<li>stress; or</li>
+<li>donor/sample effects?</li>
+</ul></li>
+<li><p>Would choosing the highest resolution automatically be preferable? Explain why or why not.</p></li>
+</ol>
+</section>
+<section id="choosing-a-defensible-resolution" class="level2">
+<h2 class="anchored" data-anchor-id="choosing-a-defensible-resolution">Choosing a defensible resolution</h2>
+<p>A cluster split is more convincing when it persists across nearby resolutions, has a coherent multi-gene marker program, is biologically interpretable, and is represented across appropriate donors or samples. Check that it is not explained primarily by technical drivers such as mitochondrial or ribosomal expression, sequencing depth, stress, or an isolated donor.</p>
+<p>Resolution selection should therefore consider:</p>
+<ul>
+<li>stability across nearby resolutions;</li>
+<li>coherent marker programs;</li>
+<li>biological interpretability;</li>
+<li>donor/sample representation;</li>
+<li>absence of obvious technical drivers; and</li>
+<li>the biological question being asked.</li>
+</ul>
+<p>The goal is not to discover one mathematically perfect resolution. It is to understand how conclusions change across reasonable graph partitions and to justify the partition used for downstream interpretation.</p>
 
 
 </section>

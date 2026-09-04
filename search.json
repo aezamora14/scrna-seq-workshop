@@ -164,7 +164,7 @@
     "href": "lessons/05-neighbors-clustering.html",
     "title": "5. Nearest neighbors, graph clustering, and resolution",
     "section": "",
-    "text": "After PCA, a cell might be represented by 30 numbers rather than 2,000 genes. FindNeighbors() identifies nearby cells in this PCA space and constructs neighbor/SNN graphs.\nobj &lt;- FindNeighbors(obj, dims = 1:30)\nConceptually, each cell is a node; edges connect cells with similar local neighborhoods. Shared-nearest-neighbor weighting strengthens relationships that are supported by overlapping neighborhoods rather than one accidental proximity.",
+    "text": "PCA gives every cell a shorter numerical description: its scores on the selected principal components. Seurat uses those coordinates to move through the following sequence:\n\nPCA coordinates: represent each cell using selected PC scores.\nNearest neighbors: find the cells closest to each cell in that PCA space.\nk-nearest-neighbor graph: connect cells to their local neighbors.\nshared-nearest-neighbor graph: strengthen connections supported by overlapping neighborhoods.\nGraph communities: find groups with stronger connections within the group than outside it.\nComputational clusters: save a community label for every cell, then interpret those communities biologically.\n\nIn compact form:\n\nPCA coordinates → nearest neighbors → kNN graph → SNN graph → graph communities → clustering\n\n\n\nA graph consists of objects called nodes. In this scRNA-seq graph, each cell is one node. A dataset containing 10,000 retained cells therefore contributes 10,000 cell nodes to the graph.\n       Cell A\n         ●\n\nCell B ●     ● Cell C\n\n         ●\n       Cell D\nThis layout is only a schematic. The positions on the page do not determine which cells are related; the relationships are calculated from similarity in the selected PCA dimensions.\n\n\n\nAn edge is a connection between two nodes. Here, an edge indicates that two cells are treated as neighbors or have a supported local similarity relationship.\nCell A ●────────● Cell B\nA slightly larger graph might look like this:\n         ● Cell A\n        / \\\n       /   \\\nCell B ●───● Cell C\n       \\   /\n        \\ /\n         ● Cell D────● Cell E\nNot every cell is connected to every other cell. The graph is deliberately sparse: its edges preserve local relationships rather than all possible cell pairs. An edge also does not mean that two cells have the same biological identity, directly interact in the tissue, or belong to the same clone.",
     "crumbs": [
       "Home",
       "Representation & structure",
@@ -172,11 +172,11 @@
     ]
   },
   {
-    "objectID": "lessons/05-neighbors-clustering.html#from-pca-coordinates-to-a-similarity-graph",
-    "href": "lessons/05-neighbors-clustering.html#from-pca-coordinates-to-a-similarity-graph",
+    "objectID": "lessons/05-neighbors-clustering.html#from-pca-coordinates-to-graph-communities",
+    "href": "lessons/05-neighbors-clustering.html#from-pca-coordinates-to-graph-communities",
     "title": "5. Nearest neighbors, graph clustering, and resolution",
     "section": "",
-    "text": "After PCA, a cell might be represented by 30 numbers rather than 2,000 genes. FindNeighbors() identifies nearby cells in this PCA space and constructs neighbor/SNN graphs.\nobj &lt;- FindNeighbors(obj, dims = 1:30)\nConceptually, each cell is a node; edges connect cells with similar local neighborhoods. Shared-nearest-neighbor weighting strengthens relationships that are supported by overlapping neighborhoods rather than one accidental proximity.",
+    "text": "PCA gives every cell a shorter numerical description: its scores on the selected principal components. Seurat uses those coordinates to move through the following sequence:\n\nPCA coordinates: represent each cell using selected PC scores.\nNearest neighbors: find the cells closest to each cell in that PCA space.\nk-nearest-neighbor graph: connect cells to their local neighbors.\nshared-nearest-neighbor graph: strengthen connections supported by overlapping neighborhoods.\nGraph communities: find groups with stronger connections within the group than outside it.\nComputational clusters: save a community label for every cell, then interpret those communities biologically.\n\nIn compact form:\n\nPCA coordinates → nearest neighbors → kNN graph → SNN graph → graph communities → clustering\n\n\n\nA graph consists of objects called nodes. In this scRNA-seq graph, each cell is one node. A dataset containing 10,000 retained cells therefore contributes 10,000 cell nodes to the graph.\n       Cell A\n         ●\n\nCell B ●     ● Cell C\n\n         ●\n       Cell D\nThis layout is only a schematic. The positions on the page do not determine which cells are related; the relationships are calculated from similarity in the selected PCA dimensions.\n\n\n\nAn edge is a connection between two nodes. Here, an edge indicates that two cells are treated as neighbors or have a supported local similarity relationship.\nCell A ●────────● Cell B\nA slightly larger graph might look like this:\n         ● Cell A\n        / \\\n       /   \\\nCell B ●───● Cell C\n       \\   /\n        \\ /\n         ● Cell D────● Cell E\nNot every cell is connected to every other cell. The graph is deliberately sparse: its edges preserve local relationships rather than all possible cell pairs. An edge also does not mean that two cells have the same biological identity, directly interact in the tissue, or belong to the same clone.",
     "crumbs": [
       "Home",
       "Representation & structure",
@@ -184,11 +184,47 @@
     ]
   },
   {
-    "objectID": "lessons/05-neighbors-clustering.html#clustering-finds-communities-in-that-graph",
-    "href": "lessons/05-neighbors-clustering.html#clustering-finds-communities-in-that-graph",
+    "objectID": "lessons/05-neighbors-clustering.html#from-pca-coordinates-to-a-knn-graph",
+    "href": "lessons/05-neighbors-clustering.html#from-pca-coordinates-to-a-knn-graph",
     "title": "5. Nearest neighbors, graph clustering, and resolution",
-    "section": "Clustering finds communities in that graph",
-    "text": "Clustering finds communities in that graph\nobj &lt;- FindClusters(obj, resolution = 0.6)\nThe clustering algorithm does not ask whether a cell is a T cell or monocyte. It asks which sets of nodes are more densely connected to one another than to the rest of the graph.",
+    "section": "From PCA coordinates to a kNN graph",
+    "text": "From PCA coordinates to a kNN graph\nAfter PCA, each cell has a coordinate on every retained PC. For example:\ndims = 1:30\nmeans that cellular similarity is calculated using cell scores in 30-dimensional PCA space. It does not mean 30 genes or 30 clusters.\nFor every cell, Seurat asks:\n\nWhich other cells are closest to this cell in PCA space?\n\nThe value k is the number of nearby cells considered when defining that local neighborhood. Connecting cells to these neighbors produces the k-nearest-neighbor (kNN) graph. In FindNeighbors(), dims selects the PCs that define similarity, whereas k.param controls the neighborhood size.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#why-construct-a-shared-nearest-neighbor-graph",
+    "href": "lessons/05-neighbors-clustering.html#why-construct-a-shared-nearest-neighbor-graph",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "Why construct a shared-nearest-neighbor graph?",
+    "text": "Why construct a shared-nearest-neighbor graph?\nA small pairwise distance can occur because of noise, a boundary between populations, or local differences in cell density. Seurat therefore also asks:\n\nDo two nearby cells share many of the same neighboring cells?\n\nSuppose two neighborhood lists are:\nCell A neighbors:\nB, C, D, F, G\n\nCell B neighbors:\nA, C, D, F, H\nCells A and B share three surrounding neighbors:\nC\nD\nF\nThat overlap provides stronger evidence that A and B occupy the same local population than distance alone. By contrast, two cells that happen to be close but share few surrounding neighbors receive weaker support.\nThe shared-nearest-neighbor (SNN) graph weights relationships using this neighborhood overlap. In Seurat, the overlap is represented using a Jaccard-style similarity: connections supported by many shared neighbors are strengthened, and weakly supported connections can be pruned.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#what-findneighbors-does",
+    "href": "lessons/05-neighbors-clustering.html#what-findneighbors-does",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "What FindNeighbors() does",
+    "text": "What FindNeighbors() does\nobj &lt;- FindNeighbors(obj, dims = 1:30)\nFindNeighbors() uses the selected PCA dimensions to construct the neighborhood representation, including the SNN graph used for clustering.\n\n\n\n\n\n\nImportant\n\n\n\nFindNeighbors() does not determine whether a cell is a CD4 T cell, NK cell, monocyte, or another biological identity. It creates the similarity graph used by the clustering algorithm.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#findclusters-detects-graph-communities",
+    "href": "lessons/05-neighbors-clustering.html#findclusters-detects-graph-communities",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "FindClusters() detects graph communities",
+    "text": "FindClusters() detects graph communities\nobj &lt;- FindClusters(obj, resolution = 0.6)\nFindClusters() performs graph-community detection. The algorithm searches for groups of cells that are more strongly interconnected with one another than with the remainder of the graph.\n\n\n\n\n\n\nImportant\n\n\n\nComputational clusters are graph communities. Biological identities are assigned afterward using marker genes, known biology, sample context, and other evidence.",
     "crumbs": [
       "Home",
       "Representation & structure",
@@ -200,19 +236,7 @@
     "href": "lessons/05-neighbors-clustering.html#what-resolution-means",
     "title": "5. Nearest neighbors, graph clustering, and resolution",
     "section": "What resolution means",
-    "text": "What resolution means\nResolution tunes the granularity of graph partitioning.\n \nHigher resolution generally produces more/smaller communities; lower resolution produces fewer/larger communities.\nIt is not a probability, p-value, image resolution, or accuracy score.",
-    "crumbs": [
-      "Home",
-      "Representation & structure",
-      "5. Nearest neighbors, graph clustering, and resolution"
-    ]
-  },
-  {
-    "objectID": "lessons/05-neighbors-clustering.html#overclustering-and-underclustering",
-    "href": "lessons/05-neighbors-clustering.html#overclustering-and-underclustering",
-    "title": "5. Nearest neighbors, graph clustering, and resolution",
-    "section": "Overclustering and underclustering",
-    "text": "Overclustering and underclustering\nA split is more convincing when the daughter clusters:\n\npersist across nearby resolutions;\nhave coherent multi-gene programs;\nare represented across multiple biological samples;\nare not defined only by mitochondrial/ribosomal genes, one donor, or extremely small cell numbers;\ncorrespond to a plausible discrete state rather than arbitrary slices of a continuum.",
+    "text": "What resolution means\nResolution tunes the granularity of graph partitioning.\n \nHigher resolution generally produces finer graph partitions and therefore more, smaller clusters. Lower resolution generally produces fewer, broader clusters.\nResolution is not a probability, p-value, image resolution, or accuracy score. A higher value can reveal a meaningful subpopulation, but it can also divide a continuous state, isolate technical variation, or create unstable small groups.",
     "crumbs": [
       "Home",
       "Representation & structure",
@@ -224,7 +248,7 @@
     "href": "lessons/05-neighbors-clustering.html#dims-and-resolution-solve-different-problems",
     "title": "5. Nearest neighbors, graph clustering, and resolution",
     "section": "dims and resolution solve different problems",
-    "text": "dims and resolution solve different problems\n\ndims: what information defines similarity?\nresolution: how finely do we partition that similarity graph?\n\nChanging either can change the final clusters, but for different reasons.",
+    "text": "dims and resolution solve different problems\n\ndims: which PCs define cell-to-cell similarity?\nresolution: how finely is the resulting graph partitioned?\n\nChanging either can alter the final clusters, but for different reasons. For a resolution sensitivity analysis, keep the PCA dimensions and SNN graph fixed so that only graph-partition granularity changes.",
     "crumbs": [
       "Home",
       "Representation & structure",
@@ -232,11 +256,47 @@
     ]
   },
   {
-    "objectID": "lessons/05-neighbors-clustering.html#sensitivity-exercise",
-    "href": "lessons/05-neighbors-clustering.html#sensitivity-exercise",
+    "objectID": "lessons/05-neighbors-clustering.html#resolution-sensitivity-exercise",
+    "href": "lessons/05-neighbors-clustering.html#resolution-sensitivity-exercise",
     "title": "5. Nearest neighbors, graph clustering, and resolution",
-    "section": "Sensitivity exercise",
-    "text": "Sensitivity exercise\nTry combinations such as:\nfor (res in c(0.2, 0.4, 0.6, 0.8, 1.0)) {\n  obj &lt;- FindClusters(obj, resolution = res)\n}\nThen inspect whether biologically important groups are stable or appear only under one parameter setting.",
+    "section": "Resolution sensitivity exercise",
+    "text": "Resolution sensitivity exercise\nAssume that FindNeighbors(obj, dims = 1:30) has already constructed one SNN graph. Cluster that same graph at several resolutions and save every result:\nresolutions &lt;- c(0.2, 0.4, 0.6, 0.8, 1.0)\n\nfor (res in resolutions) {\n\n  obj &lt;- FindClusters(\n    obj,\n    resolution = res\n  )\n\n  obj[[paste0(\"cluster_res_\", res)]] &lt;-\n    as.character(Idents(obj))\n}\nEach FindClusters() call updates the active identities. Saving a copy immediately prevents the earlier assignment from being overwritten by the next resolution. The resulting metadata columns have clear names:\ncluster_res_0.2\ncluster_res_0.4\ncluster_res_0.6\ncluster_res_0.8\ncluster_res_1\nThe final name ends in 1, rather than 1.0, because that is how R converts the numeric value when constructing the name. These numeric suffixes also work directly with the optional clustree example below.\n\nCalculate UMAP once\nIf UMAP coordinates have not already been calculated from the same PCA representation, calculate them once:\nobj &lt;- RunUMAP(\n  obj,\n  dims = 1:30\n)\nDo not rerun UMAP inside the resolution loop. The purpose is to compare several cluster assignments on one fixed set of visualization coordinates.\n\n\nVisualize every resolution\nlibrary(Seurat)\nlibrary(ggplot2)\nlibrary(patchwork)\n\nresolution_plots &lt;- lapply(\n  resolutions,\n  function(res) {\n\n    cluster_column &lt;-\n      paste0(\"cluster_res_\", res)\n\n    DimPlot(\n      obj,\n      reduction = \"umap\",\n      group.by = cluster_column,\n      label = TRUE,\n      repel = TRUE\n    ) +\n      ggtitle(\n        paste0(\"Resolution = \", res)\n      ) +\n      NoLegend()\n  }\n)\n\nwrap_plots(\n  resolution_plots,\n  ncol = 2\n)\n\n\n\n\n\n\nImportantThe cells do not move between panels\n\n\n\nImportant: The UMAP coordinates are identical in every panel. The cells are not moving as resolution changes. Only the graph-community assignment used to color and label the cells is changing.\n\n\n\n\nQuantify the number of clusters\ncluster_counts &lt;- sapply(\n  resolutions,\n  function(res) {\n\n    cluster_column &lt;-\n      paste0(\"cluster_res_\", res)\n\n    length(\n      unique(\n        obj@meta.data[[cluster_column]]\n      )\n    )\n  }\n)\n\nnames(cluster_counts) &lt;-\n  paste0(\"resolution_\", resolutions)\n\ncluster_counts\nIncreasing resolution generally produces finer graph partitioning and therefore more clusters. The increase need not occur at every adjacent value, and the size of the increase depends on the graph.\n\n\n\n\n\n\nWarning\n\n\n\nHigher resolution does not mean higher accuracy. Resolution is a sensitivity parameter, not a score to maximize.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#optional-visualize-cluster-splitting-with-clustree",
+    "href": "lessons/05-neighbors-clustering.html#optional-visualize-cluster-splitting-with-clustree",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "Optional: visualize cluster splitting with clustree",
+    "text": "Optional: visualize cluster splitting with clustree\nSide-by-side UMAPs show where subdivisions appear. A cluster tree complements them by showing which lower-resolution cluster contributes cells to which higher-resolution clusters.\nclustree is an optional dependency and is not required by the main workshop setup. Install it only if you want this advanced visualization:\nif (!requireNamespace(\"clustree\", quietly = TRUE)) {\n  install.packages(\"clustree\")\n}\n\nlibrary(clustree)\n\nclustree(\n  obj[[]],\n  prefix = \"cluster_res_\"\n)\nobj[[]] returns the cell metadata. clustree() selects columns beginning with cluster_res_, removes that prefix, and orders the remaining numeric suffixes. The saved names therefore work without renaming or preprocessing.\nA cluster tree can help identify:\n\nwhich clusters remain stable;\nwhich clusters split;\nwhen those splits occur; and\nwhether a split persists at higher resolutions.\n\nInterpret the tree together with the UMAP panels. Neither visualization establishes that a computational split is biologically meaningful.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#student-interpretation-questions",
+    "href": "lessons/05-neighbors-clustering.html#student-interpretation-questions",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "Student interpretation questions",
+    "text": "Student interpretation questions\n\nHow many clusters are present at each resolution?\nWhich broad populations remain stable across all resolutions?\nWhich population is the first to subdivide as resolution increases?\nAt what resolution does that split appear?\nDoes the split persist at the next resolution?\nWhat marker genes would you examine to determine whether the split is biologically meaningful?\nCould the split instead be driven by:\n\nmitochondrial expression;\nribosomal genes;\nsequencing depth;\ncell cycle;\nstress; or\ndonor/sample effects?\n\nWould choosing the highest resolution automatically be preferable? Explain why or why not.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#choosing-a-defensible-resolution",
+    "href": "lessons/05-neighbors-clustering.html#choosing-a-defensible-resolution",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "Choosing a defensible resolution",
+    "text": "Choosing a defensible resolution\nA cluster split is more convincing when it persists across nearby resolutions, has a coherent multi-gene marker program, is biologically interpretable, and is represented across appropriate donors or samples. Check that it is not explained primarily by technical drivers such as mitochondrial or ribosomal expression, sequencing depth, stress, or an isolated donor.\nResolution selection should therefore consider:\n\nstability across nearby resolutions;\ncoherent marker programs;\nbiological interpretability;\ndonor/sample representation;\nabsence of obvious technical drivers; and\nthe biological question being asked.\n\nThe goal is not to discover one mathematically perfect resolution. It is to understand how conclusions change across reasonable graph partitions and to justify the partition used for downstream interpretation.",
     "crumbs": [
       "Home",
       "Representation & structure",
@@ -472,11 +532,11 @@
     ]
   },
   {
-    "objectID": "exercises/index.html#exercise-4-dims-and-resolution",
-    "href": "exercises/index.html#exercise-4-dims-and-resolution",
+    "objectID": "exercises/index.html#exercise-4-neighbors-and-resolution-sensitivity",
+    "href": "exercises/index.html#exercise-4-neighbors-and-resolution-sensitivity",
     "title": "Hands-on exercises",
-    "section": "Exercise 4 — dims and resolution",
-    "text": "Exercise 4 — dims and resolution\nRun clustering with dims=1:10 and dims=1:30, then resolutions 0.3, 0.6, and 1.0.\n\nWhich choice changes the number of clusters most?\nAre any splits dominated by a single donor?\nWhich parameter controls the information used for similarity, and which controls graph granularity?",
+    "section": "Exercise 4 — Neighbors and resolution sensitivity",
+    "text": "Exercise 4 — Neighbors and resolution sensitivity\nComplete the resolution sensitivity exercise in Lesson 5:\n\nConstruct one SNN graph with FindNeighbors(obj, dims = 1:30).\nCluster that same graph at resolutions 0.2, 0.4, 0.6, 0.8, and 1.0.\nSave each assignment in a separate cluster_res_ metadata column.\nCompare all assignments on the same UMAP coordinates.\nCount the clusters and answer the interpretation questions in the lesson.\n\nAs an extension, rebuild the graph with dims = 1:10 and repeat the comparison. Explain why changing dims changes the information used to define similarity, whereas changing resolution repartitions a fixed graph.",
     "crumbs": [
       "Home",
       "Practice",

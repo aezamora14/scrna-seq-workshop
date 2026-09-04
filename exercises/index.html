@@ -266,7 +266,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#exercise-1-qc-reasoning" id="toc-exercise-1-qc-reasoning" class="nav-link active" data-scroll-target="#exercise-1-qc-reasoning">Exercise 1 — QC reasoning</a></li>
   <li><a href="#exercise-2-normalization-versus-scaling" id="toc-exercise-2-normalization-versus-scaling" class="nav-link" data-scroll-target="#exercise-2-normalization-versus-scaling">Exercise 2 — Normalization versus scaling</a></li>
   <li><a href="#exercise-3-pca" id="toc-exercise-3-pca" class="nav-link" data-scroll-target="#exercise-3-pca">Exercise 3 — PCA</a></li>
-  <li><a href="#exercise-4-dims-and-resolution" id="toc-exercise-4-dims-and-resolution" class="nav-link" data-scroll-target="#exercise-4-dims-and-resolution">Exercise 4 — <code>dims</code> and <code>resolution</code></a></li>
+  <li><a href="#exercise-4-neighbors-and-resolution-sensitivity" id="toc-exercise-4-neighbors-and-resolution-sensitivity" class="nav-link" data-scroll-target="#exercise-4-neighbors-and-resolution-sensitivity">Exercise 4 — Neighbors and resolution sensitivity</a></li>
   <li><a href="#exercise-5-annotation" id="toc-exercise-5-annotation" class="nav-link" data-scroll-target="#exercise-5-annotation">Exercise 5 — Annotation</a></li>
   <li><a href="#exercise-6-t-cell-reclustering" id="toc-exercise-6-t-cell-reclustering" class="nav-link" data-scroll-target="#exercise-6-t-cell-reclustering">Exercise 6 — T-cell reclustering</a></li>
   <li><a href="#exercise-7-biological-replication" id="toc-exercise-7-biological-replication" class="nav-link" data-scroll-target="#exercise-7-biological-replication">Exercise 7 — Biological replication</a></li>
@@ -324,14 +324,17 @@ ul.task-list li input[type="checkbox"] {
 <li>Explain the difference between a gene loading and a cell PC score.</li>
 </ol>
 </section>
-<section id="exercise-4-dims-and-resolution" class="level2">
-<h2 class="anchored" data-anchor-id="exercise-4-dims-and-resolution">Exercise 4 — <code>dims</code> and <code>resolution</code></h2>
-<p>Run clustering with <code>dims=1:10</code> and <code>dims=1:30</code>, then resolutions 0.3, 0.6, and 1.0.</p>
-<ul>
-<li>Which choice changes the number of clusters most?</li>
-<li>Are any splits dominated by a single donor?</li>
-<li>Which parameter controls the information used for similarity, and which controls graph granularity?</li>
-</ul>
+<section id="exercise-4-neighbors-and-resolution-sensitivity" class="level2">
+<h2 class="anchored" data-anchor-id="exercise-4-neighbors-and-resolution-sensitivity">Exercise 4 — Neighbors and resolution sensitivity</h2>
+<p>Complete the <a href="../lessons/05-neighbors-clustering.html#resolution-sensitivity-exercise">resolution sensitivity exercise in Lesson 5</a>:</p>
+<ol type="1">
+<li>Construct one SNN graph with <code>FindNeighbors(obj, dims = 1:30)</code>.</li>
+<li>Cluster that same graph at resolutions <code>0.2</code>, <code>0.4</code>, <code>0.6</code>, <code>0.8</code>, and <code>1.0</code>.</li>
+<li>Save each assignment in a separate <code>cluster_res_</code> metadata column.</li>
+<li>Compare all assignments on the same UMAP coordinates.</li>
+<li>Count the clusters and answer the interpretation questions in the lesson.</li>
+</ol>
+<p>As an extension, rebuild the graph with <code>dims = 1:10</code> and repeat the comparison. Explain why changing <code>dims</code> changes the information used to define similarity, whereas changing <code>resolution</code> repartitions a fixed graph.</p>
 </section>
 <section id="exercise-5-annotation" class="level2">
 <h2 class="anchored" data-anchor-id="exercise-5-annotation">Exercise 5 — Annotation</h2>
