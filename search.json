@@ -1,0 +1,871 @@
+[
+  {
+    "objectID": "setup.html",
+    "href": "setup.html",
+    "title": "Workshop setup",
+    "section": "",
+    "text": "Install:\n\nR (recent release)\nRStudio Desktop or another R IDE\nQuarto (only needed to render/edit the teaching site)\nGit (recommended)\n\nThen run:\nsource(\"scripts/00_setup.R\")\nThe core hands-on analysis uses Seurat. Later exercises optionally use dplyr, ggplot2, patchwork, and Matrix."
+  },
+  {
+    "objectID": "setup.html#software",
+    "href": "setup.html#software",
+    "title": "Workshop setup",
+    "section": "",
+    "text": "Install:\n\nR (recent release)\nRStudio Desktop or another R IDE\nQuarto (only needed to render/edit the teaching site)\nGit (recommended)\n\nThen run:\nsource(\"scripts/00_setup.R\")\nThe core hands-on analysis uses Seurat. Later exercises optionally use dplyr, ggplot2, patchwork, and Matrix."
+  },
+  {
+    "objectID": "setup.html#load-the-synthetic-dataset",
+    "href": "setup.html#load-the-synthetic-dataset",
+    "title": "Workshop setup",
+    "section": "Load the synthetic dataset",
+    "text": "Load the synthetic dataset\nlibrary(Seurat)\n\ncounts &lt;- read.csv(\n  \"data/synthetic_immune_counts.csv\",\n  row.names = 1,\n  check.names = FALSE\n)\nmetadata &lt;- read.csv(\"data/synthetic_immune_metadata.csv\")\nrownames(metadata) &lt;- metadata$cell_id\n\nobj &lt;- CreateSeuratObject(\n  counts = as.matrix(counts),\n  meta.data = metadata,\n  project = \"scrna_workshop\"\n)\nobj\n\n\n\n\n\n\nWarning\n\n\n\nThe synthetic dataset is intentionally small and simplified. It is suitable for learning mechanics and interpretation, not for benchmarking biological performance."
+  },
+  {
+    "objectID": "setup.html#recommended-folder-workflow",
+    "href": "setup.html#recommended-folder-workflow",
+    "title": "Workshop setup",
+    "section": "Recommended folder workflow",
+    "text": "Recommended folder workflow\nOpen scrna-seq-workshop.Rproj and keep the project root as the working directory. Avoid hard-coded absolute paths so the same code works for every participant and on GitHub/Codex."
+  },
+  {
+    "objectID": "lessons/09-tcr-integration.html",
+    "href": "lessons/09-tcr-integration.html",
+    "title": "9. Integrating scRNA-seq with TCR clonotypes",
+    "section": "",
+    "text": "scRNA-seq tells us: what state is this cell in?\nTCR-seq tells us: which clonal lineage does this T cell belong to?\nIntegrating them allows us to ask whether the same clonotype occupies multiple states, whether expanded clones are enriched in particular tissues/states, and whether clones are shared between compartments.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "9. Integrating scRNA-seq with TCR clonotypes"
+    ]
+  },
+  {
+    "objectID": "lessons/09-tcr-integration.html#two-orthogonal-questions",
+    "href": "lessons/09-tcr-integration.html#two-orthogonal-questions",
+    "title": "9. Integrating scRNA-seq with TCR clonotypes",
+    "section": "",
+    "text": "scRNA-seq tells us: what state is this cell in?\nTCR-seq tells us: which clonal lineage does this T cell belong to?\nIntegrating them allows us to ask whether the same clonotype occupies multiple states, whether expanded clones are enriched in particular tissues/states, and whether clones are shared between compartments.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "9. Integrating scRNA-seq with TCR clonotypes"
+    ]
+  },
+  {
+    "objectID": "lessons/09-tcr-integration.html#clone-size-is-not-tumor-specificity",
+    "href": "lessons/09-tcr-integration.html#clone-size-is-not-tumor-specificity",
+    "title": "9. Integrating scRNA-seq with TCR clonotypes",
+    "section": "Clone size is not tumor specificity",
+    "text": "Clone size is not tumor specificity\nAn expanded clone can be tumor-reactive, viral-specific, bystander, or responding to another antigen. Expansion is evidence of clonal proliferation—not proof of antigen identity.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "9. Integrating scRNA-seq with TCR clonotypes"
+    ]
+  },
+  {
+    "objectID": "lessons/09-tcr-integration.html#useful-analyses",
+    "href": "lessons/09-tcr-integration.html#useful-analyses",
+    "title": "9. Integrating scRNA-seq with TCR clonotypes",
+    "section": "Useful analyses",
+    "text": "Useful analyses\n\nclone-size distribution by tissue;\nclonotype overlap between blood and tumor;\nstate occupancy within clonotypes;\nphenotype of expanded vs singleton clones;\ndonor-aware comparisons of clonal diversity;\nfunctional validation for claims of tumor reactivity.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "9. Integrating scRNA-seq with TCR clonotypes"
+    ]
+  },
+  {
+    "objectID": "lessons/09-tcr-integration.html#workshop-metadata-example",
+    "href": "lessons/09-tcr-integration.html#workshop-metadata-example",
+    "title": "9. Integrating scRNA-seq with TCR clonotypes",
+    "section": "Workshop metadata example",
+    "text": "Workshop metadata example\nhead(obj@meta.data[, c(\n  \"donor\", \"tissue\", \"truth_cell_type\", \"truth_state\", \"clonotype\"\n)])\nFor a single clonotype:\nsubset(\n  obj@meta.data,\n  clonotype == \"clonotype_A\"\n) |&gt;\n  table(useNA = \"ifany\")",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "9. Integrating scRNA-seq with TCR clonotypes"
+    ]
+  },
+  {
+    "objectID": "lessons/09-tcr-integration.html#a-stronger-biological-statement",
+    "href": "lessons/09-tcr-integration.html#a-stronger-biological-statement",
+    "title": "9. Integrating scRNA-seq with TCR clonotypes",
+    "section": "A stronger biological statement",
+    "text": "A stronger biological statement\nWeak: “Clonotype A is exhausted.”\nStronger: “Clonotype A occupies several transcriptional states but is enriched in the exhaustion-associated compartment in tumor tissue.”\nThe latter respects the fact that clonotype identity and transcriptional phenotype are related but not equivalent.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "9. Integrating scRNA-seq with TCR clonotypes"
+    ]
+  },
+  {
+    "objectID": "lessons/07-markers-annotation.html",
+    "href": "lessons/07-markers-annotation.html",
+    "title": "7. Marker genes and biological annotation",
+    "section": "",
+    "text": "After clustering you have labels such as 0, 1, 2, 3. Marker testing asks which genes are enriched in a cluster relative to a comparison set.\nmarkers &lt;- FindAllMarkers(obj, only.pos = TRUE)\nhead(markers)\nA marker is not necessarily uniquely expressed. It is often a gene with a systematic difference in expression level and/or prevalence.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "7. Marker genes and biological annotation"
+    ]
+  },
+  {
+    "objectID": "lessons/07-markers-annotation.html#from-cluster-ids-to-biology",
+    "href": "lessons/07-markers-annotation.html#from-cluster-ids-to-biology",
+    "title": "7. Marker genes and biological annotation",
+    "section": "",
+    "text": "After clustering you have labels such as 0, 1, 2, 3. Marker testing asks which genes are enriched in a cluster relative to a comparison set.\nmarkers &lt;- FindAllMarkers(obj, only.pos = TRUE)\nhead(markers)\nA marker is not necessarily uniquely expressed. It is often a gene with a systematic difference in expression level and/or prevalence.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "7. Marker genes and biological annotation"
+    ]
+  },
+  {
+    "objectID": "lessons/07-markers-annotation.html#multi-gene-annotation",
+    "href": "lessons/07-markers-annotation.html#multi-gene-annotation",
+    "title": "7. Marker genes and biological annotation",
+    "section": "Multi-gene annotation",
+    "text": "Multi-gene annotation\nPrefer coherent programs over single markers.\n\nT cells: CD3D, CD3E, TRAC\nB cells: MS4A1, CD79A, CD74\nNK cells: NKG7, GNLY, KLRD1, PRF1 with weak/absent T-cell receptor genes\nMyeloid: LST1, TYROBP, FCER1G, CTSS\n\nA cluster with high NKG7 is not automatically NK because cytotoxic CD8 T cells can also express NKG7.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "7. Marker genes and biological annotation"
+    ]
+  },
+  {
+    "objectID": "lessons/07-markers-annotation.html#cell-type-versus-cell-state",
+    "href": "lessons/07-markers-annotation.html#cell-type-versus-cell-state",
+    "title": "7. Marker genes and biological annotation",
+    "section": "Cell type versus cell state",
+    "text": "Cell type versus cell state\nA useful hierarchy is:\n\ntype/lineage: T cell, B cell, NK, monocyte\nstate: naive-like, cytotoxic, IFN-stimulated, proliferating, exhaustion-associated\n\nDo not force every transcriptional state into a new “cell type.”",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "7. Marker genes and biological annotation"
+    ]
+  },
+  {
+    "objectID": "lessons/07-markers-annotation.html#statistical-significance-versus-biological-significance",
+    "href": "lessons/07-markers-annotation.html#statistical-significance-versus-biological-significance",
+    "title": "7. Marker genes and biological annotation",
+    "section": "Statistical significance versus biological significance",
+    "text": "Statistical significance versus biological significance\nWith thousands of cells, extremely small expression differences can generate tiny p-values. Evaluate effect size, fraction expressing, replicate consistency, and pathway/program coherence.\n\n\n\n\n\n\nWarning\n\n\n\nCluster-marker p-values do not solve pseudoreplication for condition-level biological inference. Cluster description and patient-level differential expression are different statistical questions.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "7. Marker genes and biological annotation"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html",
+    "href": "lessons/05-neighbors-clustering.html",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "",
+    "text": "After PCA, a cell might be represented by 30 numbers rather than 2,000 genes. FindNeighbors() identifies nearby cells in this PCA space and constructs neighbor/SNN graphs.\nobj &lt;- FindNeighbors(obj, dims = 1:30)\nConceptually, each cell is a node; edges connect cells with similar local neighborhoods. Shared-nearest-neighbor weighting strengthens relationships that are supported by overlapping neighborhoods rather than one accidental proximity.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#from-pca-coordinates-to-a-similarity-graph",
+    "href": "lessons/05-neighbors-clustering.html#from-pca-coordinates-to-a-similarity-graph",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "",
+    "text": "After PCA, a cell might be represented by 30 numbers rather than 2,000 genes. FindNeighbors() identifies nearby cells in this PCA space and constructs neighbor/SNN graphs.\nobj &lt;- FindNeighbors(obj, dims = 1:30)\nConceptually, each cell is a node; edges connect cells with similar local neighborhoods. Shared-nearest-neighbor weighting strengthens relationships that are supported by overlapping neighborhoods rather than one accidental proximity.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#clustering-finds-communities-in-that-graph",
+    "href": "lessons/05-neighbors-clustering.html#clustering-finds-communities-in-that-graph",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "Clustering finds communities in that graph",
+    "text": "Clustering finds communities in that graph\nobj &lt;- FindClusters(obj, resolution = 0.6)\nThe clustering algorithm does not ask whether a cell is a T cell or monocyte. It asks which sets of nodes are more densely connected to one another than to the rest of the graph.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#what-resolution-means",
+    "href": "lessons/05-neighbors-clustering.html#what-resolution-means",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "What resolution means",
+    "text": "What resolution means\nResolution tunes the granularity of graph partitioning.\n \nHigher resolution generally produces more/smaller communities; lower resolution produces fewer/larger communities.\nIt is not a probability, p-value, image resolution, or accuracy score.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#overclustering-and-underclustering",
+    "href": "lessons/05-neighbors-clustering.html#overclustering-and-underclustering",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "Overclustering and underclustering",
+    "text": "Overclustering and underclustering\nA split is more convincing when the daughter clusters:\n\npersist across nearby resolutions;\nhave coherent multi-gene programs;\nare represented across multiple biological samples;\nare not defined only by mitochondrial/ribosomal genes, one donor, or extremely small cell numbers;\ncorrespond to a plausible discrete state rather than arbitrary slices of a continuum.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#dims-and-resolution-solve-different-problems",
+    "href": "lessons/05-neighbors-clustering.html#dims-and-resolution-solve-different-problems",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "dims and resolution solve different problems",
+    "text": "dims and resolution solve different problems\n\ndims: what information defines similarity?\nresolution: how finely do we partition that similarity graph?\n\nChanging either can change the final clusters, but for different reasons.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/05-neighbors-clustering.html#sensitivity-exercise",
+    "href": "lessons/05-neighbors-clustering.html#sensitivity-exercise",
+    "title": "5. Nearest neighbors, graph clustering, and resolution",
+    "section": "Sensitivity exercise",
+    "text": "Sensitivity exercise\nTry combinations such as:\nfor (res in c(0.2, 0.4, 0.6, 0.8, 1.0)) {\n  obj &lt;- FindClusters(obj, resolution = res)\n}\nThen inspect whether biologically important groups are stable or appear only under one parameter setting.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "5. Nearest neighbors, graph clustering, and resolution"
+    ]
+  },
+  {
+    "objectID": "lessons/03-scaling.html",
+    "href": "lessons/03-scaling.html",
+    "title": "3. Scaling: putting genes on a comparable reference frame",
+    "section": "",
+    "text": "After normalization, expression is more comparable across cells, but genes still have different means and variances. PCA is a variance-based method, so genes with larger numerical variance can dominate the analysis simply because of their scale.\nA useful shorthand is:\n\nNormalization helps compare cells; scaling helps compare gene-level variation.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "3. Scaling: putting genes on a comparable reference frame"
+    ]
+  },
+  {
+    "objectID": "lessons/03-scaling.html#why-scaling-exists",
+    "href": "lessons/03-scaling.html#why-scaling-exists",
+    "title": "3. Scaling: putting genes on a comparable reference frame",
+    "section": "",
+    "text": "After normalization, expression is more comparable across cells, but genes still have different means and variances. PCA is a variance-based method, so genes with larger numerical variance can dominate the analysis simply because of their scale.\nA useful shorthand is:\n\nNormalization helps compare cells; scaling helps compare gene-level variation.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "3. Scaling: putting genes on a comparable reference frame"
+    ]
+  },
+  {
+    "objectID": "lessons/03-scaling.html#centering-and-variance-scaling",
+    "href": "lessons/03-scaling.html#centering-and-variance-scaling",
+    "title": "3. Scaling: putting genes on a comparable reference frame",
+    "section": "Centering and variance scaling",
+    "text": "Centering and variance scaling\nFor each gene independently, Seurat approximately transforms expression as:\n[ z_{i,j}= ]\nwhere x is normalized expression for gene j in cell i, mean is that gene’s mean across the analyzed cells, and s is that gene’s standard deviation.\nAfter scaling:\n\n0 means approximately average expression for that gene;\n+1 means one standard deviation above the gene’s mean;\n-1 means one standard deviation below the gene’s mean.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "3. Scaling: putting genes on a comparable reference frame"
+    ]
+  },
+  {
+    "objectID": "lessons/03-scaling.html#concrete-nkg7-example",
+    "href": "lessons/03-scaling.html#concrete-nkg7-example",
+    "title": "3. Scaling: putting genes on a comparable reference frame",
+    "section": "Concrete NKG7 example",
+    "text": "Concrete NKG7 example\nSuppose normalized NKG7 values across five cells are 0, 1, 1, 5, 8. If the mean is near 3 and the standard deviation near 3.4, the cell with value 8 receives a scaled value around +1.5.\nThat does not mean 1.5 transcripts or 150% expression. It means NKG7 is high relative to NKG7’s own distribution across the cells used for scaling.\nobj &lt;- ScaleData(obj)",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "3. Scaling: putting genes on a comparable reference frame"
+    ]
+  },
+  {
+    "objectID": "lessons/03-scaling.html#why-this-matters-for-pca",
+    "href": "lessons/03-scaling.html#why-this-matters-for-pca",
+    "title": "3. Scaling: putting genes on a comparable reference frame",
+    "section": "Why this matters for PCA",
+    "text": "Why this matters for PCA\nImagine two transcriptional programs:\n\nnaive/memory: CCR7, TCF7, IL7R, LTB\ncytotoxic: NKG7, GNLY, PRF1, GZMB\n\nTheir normalized ranges can be very different. Scaling prevents genes with intrinsically larger variance from dominating solely because of numerical magnitude, allowing PCA to detect coordinated relative changes.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "3. Scaling: putting genes on a comparable reference frame"
+    ]
+  },
+  {
+    "objectID": "lessons/03-scaling.html#gene-by-gene-reference-frames",
+    "href": "lessons/03-scaling.html#gene-by-gene-reference-frames",
+    "title": "3. Scaling: putting genes on a comparable reference frame",
+    "section": "Gene-by-gene reference frames",
+    "text": "Gene-by-gene reference frames\nIf a cell has:\n\nNKG7 scaled = +2.0\nCD3D scaled = +0.5\n\nit is incorrect to say the cell expresses four times more NKG7 than CD3D. Correct interpretation:\n\nNKG7 is much farther above its own dataset-wide mean than CD3D is above its own mean.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "3. Scaling: putting genes on a comparable reference frame"
+    ]
+  },
+  {
+    "objectID": "lessons/03-scaling.html#why-heatmaps-often-use-scaled-values",
+    "href": "lessons/03-scaling.html#why-heatmaps-often-use-scaled-values",
+    "title": "3. Scaling: putting genes on a comparable reference frame",
+    "section": "Why heatmaps often use scaled values",
+    "text": "Why heatmaps often use scaled values\nHeatmaps frequently display values around -2 ... 0 ... +2 because they emphasize where each gene is relatively high or low. Compare across cells/clusters for the same row; do not use scaled values as absolute expression comparisons across genes.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "3. Scaling: putting genes on a comparable reference frame"
+    ]
+  },
+  {
+    "objectID": "lessons/03-scaling.html#regression-during-scaling",
+    "href": "lessons/03-scaling.html#regression-during-scaling",
+    "title": "3. Scaling: putting genes on a comparable reference frame",
+    "section": "Regression during scaling",
+    "text": "Regression during scaling\nobj &lt;- ScaleData(\n  obj,\n  vars.to.regress = c(\"percent.mt\")\n)\nWhen covariates are supplied, Seurat models their relationship with each gene and then scales/centers residual variation. This can be useful when a variable represents unwanted variation, but regression can also erase real biology.\nFor example, regressing out S and G2M scores may be inappropriate if proliferating T cells are themselves biologically central to the experiment.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "3. Scaling: putting genes on a comparable reference frame"
+    ]
+  },
+  {
+    "objectID": "lessons/03-scaling.html#subsetting-changes-the-scaling-reference",
+    "href": "lessons/03-scaling.html#subsetting-changes-the-scaling-reference",
+    "title": "3. Scaling: putting genes on a comparable reference frame",
+    "section": "Subsetting changes the scaling reference",
+    "text": "Subsetting changes the scaling reference\nIf you scale all immune cells, the NKG7 mean is calculated across T cells, NK cells, B cells, and myeloid cells. If you then subset T cells and rescale, the NKG7 mean is recalculated using T cells only. The same cell can therefore have a different scaled NKG7 value without any biological change.\nThat is one reason T-cell reclustering commonly reruns HVG selection, scaling, and PCA.\n\n\n\n\n\n\nWarning\n\n\n\nNever regress out a covariate simply because software offers the option. First decide whether the variable is nuisance variation or part of the biological signal you intend to study.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "3. Scaling: putting genes on a comparable reference frame"
+    ]
+  },
+  {
+    "objectID": "lessons/01-counts-qc.html",
+    "href": "lessons/01-counts-qc.html",
+    "title": "1. Counts and quality control",
+    "section": "",
+    "text": "A droplet-based scRNA-seq experiment ultimately gives us a sparse matrix. Rows are genes, columns are cell barcodes, and entries are usually UMI counts.\n\n\n\nGene\nCell A\nCell B\nCell C\n\n\n\n\nCD3D\n8\n11\n0\n\n\nNKG7\n16\n2\n0\n\n\nMS4A1\n0\n0\n14\n\n\nLST1\n0\n0\n1\n\n\n\nThe analysis pipeline does not begin with clusters or UMAP. It begins with the question: which columns are credible representations of intact single cells?",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "1. Counts and quality control"
+    ]
+  },
+  {
+    "objectID": "lessons/01-counts-qc.html#the-starting-object-a-gene-by-cell-matrix",
+    "href": "lessons/01-counts-qc.html#the-starting-object-a-gene-by-cell-matrix",
+    "title": "1. Counts and quality control",
+    "section": "",
+    "text": "A droplet-based scRNA-seq experiment ultimately gives us a sparse matrix. Rows are genes, columns are cell barcodes, and entries are usually UMI counts.\n\n\n\nGene\nCell A\nCell B\nCell C\n\n\n\n\nCD3D\n8\n11\n0\n\n\nNKG7\n16\n2\n0\n\n\nMS4A1\n0\n0\n14\n\n\nLST1\n0\n0\n1\n\n\n\nThe analysis pipeline does not begin with clusters or UMAP. It begins with the question: which columns are credible representations of intact single cells?",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "1. Counts and quality control"
+    ]
+  },
+  {
+    "objectID": "lessons/01-counts-qc.html#what-a-zero-means",
+    "href": "lessons/01-counts-qc.html#what-a-zero-means",
+    "title": "1. Counts and quality control",
+    "section": "What a zero means",
+    "text": "What a zero means\nA zero is not automatically biological absence. It can mean low expression, sampling failure, limited library depth, or true absence. This is why interpreting one gene in one cell is risky; stable programs across many genes/cells are more reliable.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "1. Counts and quality control"
+    ]
+  },
+  {
+    "objectID": "lessons/01-counts-qc.html#three-common-qc-summaries",
+    "href": "lessons/01-counts-qc.html#three-common-qc-summaries",
+    "title": "1. Counts and quality control",
+    "section": "Three common QC summaries",
+    "text": "Three common QC summaries\n\nnFeature_RNA\nNumber of genes detected in a cell. Extremely low values can indicate empty/poor droplets; unusually high values can indicate multiplets.\n\n\nnCount_RNA\nTotal UMI count. High nCount_RNA often accompanies high nFeature_RNA, but the relationship should be inspected rather than thresholded blindly.\n\n\nmitochondrial percentage\nA high mitochondrial fraction can accompany damaged/stressed cells because cytoplasmic RNA is lost disproportionately.\nobj[[\"percent.mt\"]] &lt;- PercentageFeatureSet(obj, pattern = \"^MT-\")\nVlnPlot(obj, features = c(\"nFeature_RNA\", \"nCount_RNA\", \"percent.mt\"), ncol = 3)\nOur synthetic metadata already contains a pedagogical percent.mt variable, so you can explore its distribution even though the synthetic count matrix does not contain mitochondrial genes.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "1. Counts and quality control"
+    ]
+  },
+  {
+    "objectID": "lessons/01-counts-qc.html#why-universal-cutoffs-are-a-mistake",
+    "href": "lessons/01-counts-qc.html#why-universal-cutoffs-are-a-mistake",
+    "title": "1. Counts and quality control",
+    "section": "Why universal cutoffs are a mistake",
+    "text": "Why universal cutoffs are a mistake\nA lymphocyte may naturally contain fewer detected genes than a malignant epithelial cell. A fixed rule such as nFeature_RNA &lt; 5000 can therefore remove legitimate cells in one tissue and fail to remove doublets in another.\nA better workflow is:\n\nexamine each sample separately;\nvisualize joint relationships (nCount vs nFeature, mitochondrial fraction vs counts);\nconsider tissue biology;\nuse doublet detection when appropriate;\ndocument the exact thresholds and sensitivity analyses.\n\nFeatureScatter(obj, feature1 = \"nCount_RNA\", feature2 = \"nFeature_RNA\")\n\n\n\n\n\n\nImportant\n\n\n\nQC is not cosmetic cleanup. Filtering changes the population on which every subsequent mean, variance, PC loading, neighborhood, and cluster will be calculated.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "1. Counts and quality control"
+    ]
+  },
+  {
+    "objectID": "lessons/01-counts-qc.html#exercise",
+    "href": "lessons/01-counts-qc.html#exercise",
+    "title": "1. Counts and quality control",
+    "section": "Exercise",
+    "text": "Exercise\nOpen exercises/index.qmd and complete Exercise 1 before continuing.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "1. Counts and quality control"
+    ]
+  },
+  {
+    "objectID": "exercises/index.html",
+    "href": "exercises/index.html",
+    "title": "Hands-on exercises",
+    "section": "",
+    "text": "Using synthetic_immune_metadata.csv:\n\nPlot nCount_RNA, nFeature_RNA, and percent.mt.\nIdentify cells that would be concerning under a simple mitochondrial threshold of 15%.\nExplain why you would not use the same nFeature_RNA cutoff for every tissue/cell type in a real study.",
+    "crumbs": [
+      "Home",
+      "Practice",
+      "Hands-on exercises"
+    ]
+  },
+  {
+    "objectID": "exercises/index.html#exercise-1-qc-reasoning",
+    "href": "exercises/index.html#exercise-1-qc-reasoning",
+    "title": "Hands-on exercises",
+    "section": "",
+    "text": "Using synthetic_immune_metadata.csv:\n\nPlot nCount_RNA, nFeature_RNA, and percent.mt.\nIdentify cells that would be concerning under a simple mitochondrial threshold of 15%.\nExplain why you would not use the same nFeature_RNA cutoff for every tissue/cell type in a real study.",
+    "crumbs": [
+      "Home",
+      "Practice",
+      "Hands-on exercises"
+    ]
+  },
+  {
+    "objectID": "exercises/index.html#exercise-2-normalization-versus-scaling",
+    "href": "exercises/index.html#exercise-2-normalization-versus-scaling",
+    "title": "Hands-on exercises",
+    "section": "Exercise 2 — Normalization versus scaling",
+    "text": "Exercise 2 — Normalization versus scaling\n\nNormalize the Seurat object.\nSelect HVGs.\nScale the object.\nFor NKG7 and CCR7, compare normalized and scaled values for several cells.\nWrite one sentence explaining what a scaled value of +2 means.",
+    "crumbs": [
+      "Home",
+      "Practice",
+      "Hands-on exercises"
+    ]
+  },
+  {
+    "objectID": "exercises/index.html#exercise-3-pca",
+    "href": "exercises/index.html#exercise-3-pca",
+    "title": "Hands-on exercises",
+    "section": "Exercise 3 — PCA",
+    "text": "Exercise 3 — PCA\n\nRun PCA.\nInspect the top positive and negative loadings for PCs 1–5.\nPropose a biological interpretation for at least two PCs.\nExplain the difference between a gene loading and a cell PC score.",
+    "crumbs": [
+      "Home",
+      "Practice",
+      "Hands-on exercises"
+    ]
+  },
+  {
+    "objectID": "exercises/index.html#exercise-4-dims-and-resolution",
+    "href": "exercises/index.html#exercise-4-dims-and-resolution",
+    "title": "Hands-on exercises",
+    "section": "Exercise 4 — dims and resolution",
+    "text": "Exercise 4 — dims and resolution\nRun clustering with dims=1:10 and dims=1:30, then resolutions 0.3, 0.6, and 1.0.\n\nWhich choice changes the number of clusters most?\nAre any splits dominated by a single donor?\nWhich parameter controls the information used for similarity, and which controls graph granularity?",
+    "crumbs": [
+      "Home",
+      "Practice",
+      "Hands-on exercises"
+    ]
+  },
+  {
+    "objectID": "exercises/index.html#exercise-5-annotation",
+    "href": "exercises/index.html#exercise-5-annotation",
+    "title": "Hands-on exercises",
+    "section": "Exercise 5 — Annotation",
+    "text": "Exercise 5 — Annotation\nWithout using truth_cell_type, annotate clusters using marker genes. Then reveal truth_cell_type and compare.",
+    "crumbs": [
+      "Home",
+      "Practice",
+      "Hands-on exercises"
+    ]
+  },
+  {
+    "objectID": "exercises/index.html#exercise-6-t-cell-reclustering",
+    "href": "exercises/index.html#exercise-6-t-cell-reclustering",
+    "title": "Hands-on exercises",
+    "section": "Exercise 6 — T-cell reclustering",
+    "text": "Exercise 6 — T-cell reclustering\nSubset CD4/CD8 T cells, rerun preprocessing/PCA/clustering, and ask whether naive/cytotoxic/exhaustion-associated structure becomes clearer.",
+    "crumbs": [
+      "Home",
+      "Practice",
+      "Hands-on exercises"
+    ]
+  },
+  {
+    "objectID": "exercises/index.html#exercise-7-biological-replication",
+    "href": "exercises/index.html#exercise-7-biological-replication",
+    "title": "Hands-on exercises",
+    "section": "Exercise 7 — Biological replication",
+    "text": "Exercise 7 — Biological replication\nFor CD8 T cells, design a donor-aware comparison of tumor vs blood. Explain why treating every cell as an independent replicate would inflate evidence.",
+    "crumbs": [
+      "Home",
+      "Practice",
+      "Hands-on exercises"
+    ]
+  },
+  {
+    "objectID": "exercises/index.html#exercise-8-tcr-integration",
+    "href": "exercises/index.html#exercise-8-tcr-integration",
+    "title": "Hands-on exercises",
+    "section": "Exercise 8 — TCR integration",
+    "text": "Exercise 8 — TCR integration\nFor clonotype_A through clonotype_D:\n\ncompute clone size;\ntabulate tissue distribution;\ntabulate state occupancy;\nidentify which statements are descriptive versus which would require functional validation.",
+    "crumbs": [
+      "Home",
+      "Practice",
+      "Hands-on exercises"
+    ]
+  },
+  {
+    "objectID": "capstone.html",
+    "href": "capstone.html",
+    "title": "Capstone: defend an scRNA-seq analysis",
+    "section": "",
+    "text": "You are given a tumor/immune scRNA-seq dataset with paired TCR data. Your task is not merely to generate a UMAP; it is to produce an analysis defense."
+  },
+  {
+    "objectID": "capstone.html#deliverables",
+    "href": "capstone.html#deliverables",
+    "title": "Capstone: defend an scRNA-seq analysis",
+    "section": "Deliverables",
+    "text": "Deliverables\n\nQC rationale and plots.\nNormalization/HVG/scaling choices.\nPCA interpretation including loadings for selected PCs.\nJustification for chosen dims.\nClustering sensitivity across at least three resolutions.\nMarker-based cell type/state annotations.\nA donor-aware differential-expression plan.\nA TCR analysis distinguishing clone expansion, phenotype, tissue sharing, and functional claims.\nA one-page limitations section identifying at least three ways the analysis could mislead."
+  },
+  {
+    "objectID": "capstone.html#oral-defense-questions",
+    "href": "capstone.html#oral-defense-questions",
+    "title": "Capstone: defend an scRNA-seq analysis",
+    "section": "Oral defense questions",
+    "text": "Oral defense questions\n\nIf PC1 is dominated by interferon response, should you regress it out?\nIf a rare population disappears when you move from 40 PCs to 20 PCs, what does that tell you?\nIf a cluster exists only at resolution 1.5 and comes almost entirely from one donor, do you believe it?\nIf UMAP islands move after changing the random seed but graph cluster assignments are stable, what matters more?\nIf an expanded clonotype is enriched in tumor, what can and cannot be concluded?"
+  },
+  {
+    "objectID": "index.html#what-this-workshop-teaches",
+    "href": "index.html#what-this-workshop-teaches",
+    "title": "Practical scRNA-seq Analysis Workshop",
+    "section": "What this workshop teaches",
+    "text": "What this workshop teaches\nThis workshop is designed for biomedical researchers who want to understand what the major scRNA-seq analysis steps are actually doing, not just which Seurat commands to run. We use a tumor/immune-cell framing throughout, with repeated T-cell examples and a final TCR integration module.\nBy the end, participants should be able to explain and implement the logic of:\n\ncount matrices, UMIs, and quality control;\nnormalization and highly variable feature selection;\nscaling and regression;\nPCA, gene loadings, cell scores, and dims;\nnearest-neighbor graphs, clustering, and resolution;\nUMAP and what its geometry can and cannot tell you;\ncluster markers and cell-type/state annotation;\nsubsetting, reintegration, differential expression, and pseudobulk;\nscRNA-seq/TCR-seq integration and clonotype-state analysis.\n\n\n\n\n\n\n\nTeaching philosophy\n\n\n\nEvery module uses the same sequence: problem → computation → code → biological example → interpretation → common mistake → exercise."
+  },
+  {
+    "objectID": "index.html#data-used-in-the-exercises",
+    "href": "index.html#data-used-in-the-exercises",
+    "title": "Practical scRNA-seq Analysis Workshop",
+    "section": "Data used in the exercises",
+    "text": "Data used in the exercises\nThe repository includes a small synthetic immune dataset in data/ so participants can run the workflow without downloading protected or very large datasets. The metadata intentionally includes donor, condition, tissue, reference cell type/state, and TCR clonotype fields so later statistical and TCR exercises are possible."
+  },
+  {
+    "objectID": "index.html#suggested-formats",
+    "href": "index.html#suggested-formats",
+    "title": "Practical scRNA-seq Analysis Workshop",
+    "section": "Suggested formats",
+    "text": "Suggested formats\n\nOne-day intensive: 6–7 hours plus breaks.\nTwo half-days: foundations on Day 1; clustering, interpretation, statistics, and TCR on Day 2.\nGraduate course: one module per class with the exercises assigned between sessions."
+  },
+  {
+    "objectID": "lessons/02-normalization-hvg.html",
+    "href": "lessons/02-normalization-hvg.html",
+    "title": "2. Normalization and highly variable genes",
+    "section": "",
+    "text": "Two otherwise similar cells can have different total UMI counts simply because one cell was captured/sequenced more deeply.\nSuppose:\n\nCell A: 5,000 total UMIs; CD3D = 50\nCell B: 10,000 total UMIs; CD3D = 100\n\nThe raw CD3D counts differ twofold, but CD3D occupies the same fraction of each library. Standard log normalization therefore performs a cell-level library-size correction followed by a log transform.\nFor Seurat’s default LogNormalize, conceptually:\n[ _{g,c}=(1+,000) ]\nobj &lt;- NormalizeData(obj, normalization.method = \"LogNormalize\", scale.factor = 10000)\n\n\nIt does not remove batch effects, make donors biological replicates, eliminate dropout, or make genes comparable for PCA. Those are separate issues.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "2. Normalization and highly variable genes"
+    ]
+  },
+  {
+    "objectID": "lessons/02-normalization-hvg.html#the-problem-normalization-solves",
+    "href": "lessons/02-normalization-hvg.html#the-problem-normalization-solves",
+    "title": "2. Normalization and highly variable genes",
+    "section": "",
+    "text": "Two otherwise similar cells can have different total UMI counts simply because one cell was captured/sequenced more deeply.\nSuppose:\n\nCell A: 5,000 total UMIs; CD3D = 50\nCell B: 10,000 total UMIs; CD3D = 100\n\nThe raw CD3D counts differ twofold, but CD3D occupies the same fraction of each library. Standard log normalization therefore performs a cell-level library-size correction followed by a log transform.\nFor Seurat’s default LogNormalize, conceptually:\n[ _{g,c}=(1+,000) ]\nobj &lt;- NormalizeData(obj, normalization.method = \"LogNormalize\", scale.factor = 10000)\n\n\nIt does not remove batch effects, make donors biological replicates, eliminate dropout, or make genes comparable for PCA. Those are separate issues.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "2. Normalization and highly variable genes"
+    ]
+  },
+  {
+    "objectID": "lessons/02-normalization-hvg.html#highly-variable-genes-hvgs",
+    "href": "lessons/02-normalization-hvg.html#highly-variable-genes-hvgs",
+    "title": "2. Normalization and highly variable genes",
+    "section": "Highly variable genes (HVGs)",
+    "text": "Highly variable genes (HVGs)\nPCA usually should not be driven by thousands of genes that barely change across cells. FindVariableFeatures() identifies genes with more variability than expected for their average expression.\nobj &lt;- FindVariableFeatures(obj, selection.method = \"vst\", nfeatures = 2000)\nVariableFeaturePlot(obj)\nThe key idea is the mean–variance relationship: highly expressed genes tend to have greater raw variance even when nothing interesting is happening. HVG methods model that relationship and prioritize features that vary unusually strongly.\n\nHVG does not mean “important gene”\nA gene can be biologically essential but nearly constant across all cells. It would be poor for distinguishing cells and therefore may not be selected as an HVG. Conversely, a highly variable gene can reflect technical or stress-associated variation.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "2. Normalization and highly variable genes"
+    ]
+  },
+  {
+    "objectID": "lessons/02-normalization-hvg.html#example",
+    "href": "lessons/02-normalization-hvg.html#example",
+    "title": "2. Normalization and highly variable genes",
+    "section": "Example",
+    "text": "Example\nIf ACTB is high in nearly every immune cell, it contributes little to distinguishing T cells from B cells. If CD3D, MS4A1, and LST1 differ strongly among populations, they are far more informative for cell-state representation.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "2. Normalization and highly variable genes"
+    ]
+  },
+  {
+    "objectID": "lessons/02-normalization-hvg.html#sctransform",
+    "href": "lessons/02-normalization-hvg.html#sctransform",
+    "title": "2. Normalization and highly variable genes",
+    "section": "SCTransform",
+    "text": "SCTransform\nSCTransform is an alternative normalization/variance-stabilization strategy that models UMI counts with a regularized negative-binomial framework. It can replace the classic NormalizeData() → FindVariableFeatures() → ScaleData() preprocessing sequence in many workflows. The workshop starts with the classic workflow because its individual transformations are easier to learn explicitly.\n\n\n\n\n\n\nNote\n\n\n\nDo not mix conceptual questions. “Which cells have different library depths?” is normalization. “Which genes vary unusually across cells?” is feature selection.",
+    "crumbs": [
+      "Home",
+      "Foundations",
+      "2. Normalization and highly variable genes"
+    ]
+  },
+  {
+    "objectID": "lessons/04-pca.html",
+    "href": "lessons/04-pca.html",
+    "title": "4. Principal component analysis (PCA)",
+    "section": "",
+    "text": "If PCA uses 2,000 variable genes, every cell initially occupies a 2,000-dimensional gene-expression space. PCA creates a smaller set of orthogonal axes that capture progressively smaller amounts of variance.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "4. Principal component analysis (PCA)"
+    ]
+  },
+  {
+    "objectID": "lessons/04-pca.html#the-dimensionality-problem",
+    "href": "lessons/04-pca.html#the-dimensionality-problem",
+    "title": "4. Principal component analysis (PCA)",
+    "section": "",
+    "text": "If PCA uses 2,000 variable genes, every cell initially occupies a 2,000-dimensional gene-expression space. PCA creates a smaller set of orthogonal axes that capture progressively smaller amounts of variance.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "4. Principal component analysis (PCA)"
+    ]
+  },
+  {
+    "objectID": "lessons/04-pca.html#a-principal-component-is-a-weighted-combination-of-genes",
+    "href": "lessons/04-pca.html#a-principal-component-is-a-weighted-combination-of-genes",
+    "title": "4. Principal component analysis (PCA)",
+    "section": "A principal component is a weighted combination of genes",
+    "text": "A principal component is a weighted combination of genes\nA simplified component might be:\n[ PC_3=0.31(NKG7)+0.29(GNLY)+0.25(PRF1)-0.21(CCR7)-0.19(IL7R)+ ]\nThe coefficients are gene loadings. Large absolute loadings mean a gene contributes strongly to that PC; the sign indicates direction along the axis.\nobj &lt;- RunPCA(obj, features = VariableFeatures(obj))\nVizDimLoadings(obj, dims = 1:5, reduction = \"pca\")\nLoadings(obj, reduction = \"pca\")[1:10, 1:5]",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "4. Principal component analysis (PCA)"
+    ]
+  },
+  {
+    "objectID": "lessons/04-pca.html#does-a-loading-account-for-every-cell",
+    "href": "lessons/04-pca.html#does-a-loading-account-for-every-cell",
+    "title": "4. Principal component analysis (PCA)",
+    "section": "Does a loading account for every cell?",
+    "text": "Does a loading account for every cell?\nYes. The loading is learned from how each input gene varies across all cells included in that PCA calculation. Once the axes are learned, every cell receives a PC score locating it along each axis.\n\nGene loading: what defines the PC?\nCell score: where does this cell lie on that PC?",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "4. Principal component analysis (PCA)"
+    ]
+  },
+  {
+    "objectID": "lessons/04-pca.html#what-pc1-pc2-pc3-mean",
+    "href": "lessons/04-pca.html#what-pc1-pc2-pc3-mean",
+    "title": "4. Principal component analysis (PCA)",
+    "section": "What PC1, PC2, PC3 mean",
+    "text": "What PC1, PC2, PC3 mean\nPC1 captures the greatest variance. PC2 captures the greatest remaining variance subject to being orthogonal to PC1, and so on.\nIn an immune dataset, an illustrative sequence might be:\n\nPC1: myeloid ↔︎ lymphoid\nPC2: B ↔︎ T\nPC3: naive/memory ↔︎ cytotoxic\nPC4: interferon response\nPC5: proliferation\n\nThese labels are interpretations from the loadings; PCA does not know biological terminology.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "4. Principal component analysis (PCA)"
+    ]
+  },
+  {
+    "objectID": "lessons/04-pca.html#major-contributing-genes-has-no-universal-cutoff",
+    "href": "lessons/04-pca.html#major-contributing-genes-has-no-universal-cutoff",
+    "title": "4. Principal component analysis (PCA)",
+    "section": "“Major contributing genes” has no universal cutoff",
+    "text": "“Major contributing genes” has no universal cutoff\nA common practice is to inspect the largest positive and negative loadings or the largest absolute loadings. There is no universal loading threshold such as 0.2 that defines biological importance.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "4. Principal component analysis (PCA)"
+    ]
+  },
+  {
+    "objectID": "lessons/04-pca.html#choosing-dims",
+    "href": "lessons/04-pca.html#choosing-dims",
+    "title": "4. Principal component analysis (PCA)",
+    "section": "Choosing dims",
+    "text": "Choosing dims\nElbowPlot(obj, ndims = 50)\nobj &lt;- FindNeighbors(obj, dims = 1:30)\ndims = 1:30 means the neighborhood graph will use the first 30 PCs—not 30 genes.\nUsing too few PCs can collapse subtle biology; using too many can admit weak technical/noisy structure. Examine variance, PC loadings, stability of downstream results, and the biological complexity of the dataset.\n\n\n\n\n\n\nImportant\n\n\n\nThe largest source of variance is not automatically the most biologically important. A rare but clinically important cell state can be relegated to a later PC because it affects relatively few cells.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "4. Principal component analysis (PCA)"
+    ]
+  },
+  {
+    "objectID": "lessons/06-umap.html",
+    "href": "lessons/06-umap.html",
+    "title": "6. UMAP: visualization, not the clustering algorithm",
+    "section": "",
+    "text": "UMAP embeds the high-dimensional representation into two dimensions while prioritizing preservation of local neighborhood structure.\nobj &lt;- RunUMAP(obj, dims = 1:30)\nDimPlot(obj, reduction = \"umap\", group.by = \"seurat_clusters\", label = TRUE)",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "6. UMAP: visualization, not the clustering algorithm"
+    ]
+  },
+  {
+    "objectID": "lessons/06-umap.html#what-umap-does",
+    "href": "lessons/06-umap.html#what-umap-does",
+    "title": "6. UMAP: visualization, not the clustering algorithm",
+    "section": "",
+    "text": "UMAP embeds the high-dimensional representation into two dimensions while prioritizing preservation of local neighborhood structure.\nobj &lt;- RunUMAP(obj, dims = 1:30)\nDimPlot(obj, reduction = \"umap\", group.by = \"seurat_clusters\", label = TRUE)",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "6. UMAP: visualization, not the clustering algorithm"
+    ]
+  },
+  {
+    "objectID": "lessons/06-umap.html#what-you-can-usually-say",
+    "href": "lessons/06-umap.html#what-you-can-usually-say",
+    "title": "6. UMAP: visualization, not the clustering algorithm",
+    "section": "What you can usually say",
+    "text": "What you can usually say\nCells that are close on a well-behaved UMAP often share similar local transcriptional neighborhoods.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "6. UMAP: visualization, not the clustering algorithm"
+    ]
+  },
+  {
+    "objectID": "lessons/06-umap.html#what-you-should-not-over-interpret",
+    "href": "lessons/06-umap.html#what-you-should-not-over-interpret",
+    "title": "6. UMAP: visualization, not the clustering algorithm",
+    "section": "What you should not over-interpret",
+    "text": "What you should not over-interpret\nThe exact distance between far-apart islands, island size, orientation, and empty space are not direct biological measurements. UMAP is not a phylogenetic tree, trajectory, or quantitative distance map.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "6. UMAP: visualization, not the clustering algorithm"
+    ]
+  },
+  {
+    "objectID": "lessons/06-umap.html#clustering-and-umap-are-distinct",
+    "href": "lessons/06-umap.html#clustering-and-umap-are-distinct",
+    "title": "6. UMAP: visualization, not the clustering algorithm",
+    "section": "Clustering and UMAP are distinct",
+    "text": "Clustering and UMAP are distinct\nTypical logic:\nPCA → neighbor graph → clustering\nand separately:\nPCA → UMAP visualization\nSo the cluster labels are usually produced from graph partitioning and then painted onto the UMAP.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "6. UMAP: visualization, not the clustering algorithm"
+    ]
+  },
+  {
+    "objectID": "lessons/06-umap.html#a-dangerous-workflow",
+    "href": "lessons/06-umap.html#a-dangerous-workflow",
+    "title": "6. UMAP: visualization, not the clustering algorithm",
+    "section": "A dangerous workflow",
+    "text": "A dangerous workflow\n“These look like two islands, therefore they are two cell types” is not sufficient. Validate with markers, sample composition, known biology, and sensitivity to preprocessing/parameters.",
+    "crumbs": [
+      "Home",
+      "Representation & structure",
+      "6. UMAP: visualization, not the clustering algorithm"
+    ]
+  },
+  {
+    "objectID": "lessons/08-subsetting-integration-de.html",
+    "href": "lessons/08-subsetting-integration-de.html",
+    "title": "8. Subsetting, integration, differential expression, and pseudobulk",
+    "section": "",
+    "text": "In a whole tumor microenvironment, early PCs may separate immune from stromal cells, or myeloid from lymphoid cells. Those axes can overwhelm subtle T-cell differences.\nAfter subsetting T cells, rerun feature selection, scaling, PCA, neighbors, clustering, and UMAP so the reference frame is defined by T-cell variation.\ntcells &lt;- subset(obj, subset = truth_cell_type %in% c(\"CD4_T\", \"CD8_T\"))\ntcells &lt;- NormalizeData(tcells)\ntcells &lt;- FindVariableFeatures(tcells)\ntcells &lt;- ScaleData(tcells)\ntcells &lt;- RunPCA(tcells)\ntcells &lt;- FindNeighbors(tcells, dims = 1:20)\ntcells &lt;- FindClusters(tcells, resolution = 0.6)\ntcells &lt;- RunUMAP(tcells, dims = 1:20)",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "8. Subsetting, integration, differential expression, and pseudobulk"
+    ]
+  },
+  {
+    "objectID": "lessons/08-subsetting-integration-de.html#why-subset-and-recluster",
+    "href": "lessons/08-subsetting-integration-de.html#why-subset-and-recluster",
+    "title": "8. Subsetting, integration, differential expression, and pseudobulk",
+    "section": "",
+    "text": "In a whole tumor microenvironment, early PCs may separate immune from stromal cells, or myeloid from lymphoid cells. Those axes can overwhelm subtle T-cell differences.\nAfter subsetting T cells, rerun feature selection, scaling, PCA, neighbors, clustering, and UMAP so the reference frame is defined by T-cell variation.\ntcells &lt;- subset(obj, subset = truth_cell_type %in% c(\"CD4_T\", \"CD8_T\"))\ntcells &lt;- NormalizeData(tcells)\ntcells &lt;- FindVariableFeatures(tcells)\ntcells &lt;- ScaleData(tcells)\ntcells &lt;- RunPCA(tcells)\ntcells &lt;- FindNeighbors(tcells, dims = 1:20)\ntcells &lt;- FindClusters(tcells, resolution = 0.6)\ntcells &lt;- RunUMAP(tcells, dims = 1:20)",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "8. Subsetting, integration, differential expression, and pseudobulk"
+    ]
+  },
+  {
+    "objectID": "lessons/08-subsetting-integration-de.html#integrationbatch-correction",
+    "href": "lessons/08-subsetting-integration-de.html#integrationbatch-correction",
+    "title": "8. Subsetting, integration, differential expression, and pseudobulk",
+    "section": "Integration/batch correction",
+    "text": "Integration/batch correction\nIntegration methods attempt to reduce unwanted technical structure while preserving biology. The key question is not “did batches mix?” but did we remove unwanted technical effects without erasing condition/tissue biology?\nNo algorithm can rescue a perfectly confounded design. If all controls were processed on Day 1 and all disease samples on Day 2, batch and biology cannot be uniquely separated computationally.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "8. Subsetting, integration, differential expression, and pseudobulk"
+    ]
+  },
+  {
+    "objectID": "lessons/08-subsetting-integration-de.html#differential-expression",
+    "href": "lessons/08-subsetting-integration-de.html#differential-expression",
+    "title": "8. Subsetting, integration, differential expression, and pseudobulk",
+    "section": "Differential expression",
+    "text": "Differential expression\nFindMarkers() can compare predefined groups, but when making donor-level claims you must respect biological replication.\nSuppose six donors contribute thousands of T cells. For a treatment comparison, n is typically six donors, not the total number of cells.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "8. Subsetting, integration, differential expression, and pseudobulk"
+    ]
+  },
+  {
+    "objectID": "lessons/08-subsetting-integration-de.html#pseudobulk-logic",
+    "href": "lessons/08-subsetting-integration-de.html#pseudobulk-logic",
+    "title": "8. Subsetting, integration, differential expression, and pseudobulk",
+    "section": "Pseudobulk logic",
+    "text": "Pseudobulk logic\nAggregate raw counts within each biological replicate and cell population, then use bulk RNA-seq frameworks such as edgeR/DESeq2/limma-voom.\nConceptually:\n[ g={c}x_{g,c} ]\nPseudobulk asks whether replicate-level expression differs between conditions while preserving the biological unit of replication.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "8. Subsetting, integration, differential expression, and pseudobulk"
+    ]
+  },
+  {
+    "objectID": "lessons/08-subsetting-integration-de.html#composition-is-a-separate-question",
+    "href": "lessons/08-subsetting-integration-de.html#composition-is-a-separate-question",
+    "title": "8. Subsetting, integration, differential expression, and pseudobulk",
+    "section": "Composition is a separate question",
+    "text": "Composition is a separate question\nA treatment can change the proportion of CD8 T cells without changing expression within CD8 cells, or vice versa. Cell abundance/composition analysis and within-cell-type differential expression should be treated as distinct analyses.",
+    "crumbs": [
+      "Home",
+      "Biological interpretation",
+      "8. Subsetting, integration, differential expression, and pseudobulk"
+    ]
+  },
+  {
+    "objectID": "schedule.html",
+    "href": "schedule.html",
+    "title": "Suggested workshop schedule",
+    "section": "",
+    "text": "Time\nModule\nEmphasis\n\n\n\n\n09:00–09:30\nOrientation + count matrix\nWhat the data actually represent\n\n\n09:30–10:15\nQC\nnCount, nFeature, mitochondrial fraction, doublets\n\n\n10:15–11:00\nNormalization + HVGs\nCell-level normalization vs gene selection\n\n\n11:15–12:00\nScaling\nCentering, variance scaling, regression\n\n\n13:00–14:00\nPCA\nLoadings, scores, variance, choosing dims\n\n\n14:00–15:00\nNeighbors + clustering\nSNN graph, resolution, stability\n\n\n15:15–15:45\nUMAP\nVisualization vs inference\n\n\n15:45–16:30\nMarkers + annotation\nCell types vs states, multi-gene evidence\n\n\n16:30–17:15\nDE + pseudobulk + TCR\nReplicates, clonotypes, capstone\n\n\n\nFor a two-day version, expand each hands-on block and add the optional integration and compositional-analysis exercises."
+  }
+]
